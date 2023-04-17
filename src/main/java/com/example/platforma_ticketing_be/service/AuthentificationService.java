@@ -42,12 +42,12 @@ public class AuthentificationService {
         this.emailService = emailService;
     }
 
-    private String createAuthentication(String username, String password, boolean rememberMe, List<String> roles){
+    private String createAuthentication(String username, String password, boolean rememberMe, String role){
         UserAccount userAccount = this.userRepository.findByEmailAndPassword(username, password);
         System.out.println(userAccount);
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put("AUTHORITIES_KEY", roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
+        claims.put("AUTHORITIES_KEY", new SimpleGrantedAuthority(role));
 
         String token = jwtTokenValidator.generateJwtToken(userAccount, rememberMe, claims);
         JwtAccessToken accessToken = new JwtAccessToken(token, jwtSecret);
@@ -57,21 +57,13 @@ public class AuthentificationService {
     }
 
     public UserDetail login(String username, String password, boolean rememberMe) {
-        List<String> roles = new ArrayList<>();
-        roles.add("client");
-        /*UserAccount userAccount = this.userRepository.findByEmailAndPassword(username, password);
-        for(Role role: userAccount.getRoles()){
-            roles.add(role.toString());
-        }*/
-        System.out.println(username);
-        System.out.println(password);
-            String token = createAuthentication(username, password, rememberMe, roles);
+        /*List<String> roles = new ArrayList<>();
+        roles.add("client");*/
+        UserAccount userAccount = this.userRepository.findByEmailAndPassword(username, password);
+            String token = createAuthentication(username, password, rememberMe, userAccount.getRole());
             JwtAccessToken accessToken = new JwtAccessToken(token, jwtSecret);
             JwtAuthentication authentication = new JwtAuthentication(accessToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-        UserAccount userAccount = this.userRepository.findByEmailAndPassword(username, password);
-        System.out.println(token);
-        System.out.println(token.length());
         userAccount.setToken(token);
         this.userRepository.save(userAccount);
         System.out.println(((UserDetail) SecurityContextHolder.getContext().getAuthentication().getDetails()).getUsername());

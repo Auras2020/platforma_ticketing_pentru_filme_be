@@ -8,6 +8,7 @@ import com.example.platforma_ticketing_be.security.jwt.UserDetail;
 import com.example.platforma_ticketing_be.service.AuthentificationService;
 import com.example.platforma_ticketing_be.service.email.EmailServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,8 +29,9 @@ public class AuthenticationController {
                 userCredentialsDto.getPassword(), userCredentialsDto.getRememberMe());
     }
 
-    @PostMapping("/logout")
+    @PostMapping("/logout-user")
     public void logout() {
+        System.out.println("here");
         authentificationService.logout();
     }
 

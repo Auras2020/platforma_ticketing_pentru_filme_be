@@ -1,7 +1,7 @@
 package com.example.platforma_ticketing_be.entities;
 
 public enum UserRole {
-    admin,
-    client,
-    distributor
+    ADMIN,
+    CLIENT,
+    DISTRIBUITOR
 }

@@ -9,4 +9,5 @@ public class UserDetail {
 
   private String username;
   private String token;
+  private String role;
 }
