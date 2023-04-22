@@ -7,11 +7,10 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class TheatreDto {
-    private Long id;
+public class TheatreFilterDto {
+
     private String name;
-    private byte[] poster;
-    private String posterName;
     private String location;
     private String address;
+    private String searchString;
 }

@@ -12,8 +12,8 @@ import javax.persistence.Column;
 @ToString
 public class UserFilterDto {
     private String name;
-    //private int age;
     private String email;
     private String role;
+    private String ageInterval;
     private String searchString;
 }

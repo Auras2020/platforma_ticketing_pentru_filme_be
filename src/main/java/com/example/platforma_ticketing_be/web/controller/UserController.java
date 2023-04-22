@@ -23,6 +23,11 @@ public class UserController {
         this.userService = userService;
     }
 
+   /* @GetMapping("/current")
+    public UserAccount getCurrentUser(){
+        return this.userService.getCurrentUser();
+    }*/
+
     @GetMapping
     public List<UserCreateDTO> getAllUsers(){
         return this.userService.getAllUsers();

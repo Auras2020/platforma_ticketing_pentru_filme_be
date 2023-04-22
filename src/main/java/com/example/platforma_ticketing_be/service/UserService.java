@@ -1,8 +1,6 @@
 package com.example.platforma_ticketing_be.service;
 
-import com.example.platforma_ticketing_be.dtos.UserCreateDTO;
-import com.example.platforma_ticketing_be.dtos.UserPageDto;
-import com.example.platforma_ticketing_be.dtos.UserPageResponseDto;
+import com.example.platforma_ticketing_be.dtos.*;
 import com.example.platforma_ticketing_be.entities.UserAccount;
 import com.example.platforma_ticketing_be.entities.UserRole;
 import com.example.platforma_ticketing_be.repository.UserRepository;
@@ -12,10 +10,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -56,14 +55,21 @@ public class UserService {
     }
 
     public UserAccount getCurrentUser() {
-        String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        System.out.println("username: " + username);
-        return userRepository.findByEmail(username);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
+
+                // Cast the principal to your user model class
+
+                System.out.println("eee " + principal);
+                return this.userRepository.findByEmail(principal + "");
+                // ...
+
+        }
+        return null;
     }
 
-    public UserPageResponseDto findAllByPaging(int page, int size) {
-        Pageable pagingSort = PageRequest.of(page, size);
-        Page<UserAccount> pageOfUsers = this.userRepository.findAll(pagingSort);
+    private UserPageResponseDto getUserPageResponse(Page<UserAccount> pageOfUsers){
         List<UserAccount> users = pageOfUsers.getContent();
         List<UserCreateDTO> dtos = users.stream()
                 .map(userAccount -> this.modelMapper.map(userAccount, UserCreateDTO.class))
@@ -72,16 +78,18 @@ public class UserService {
                 (int) pageOfUsers.getTotalElements(), pageOfUsers.getTotalPages());
     }
 
+    public UserPageResponseDto findAllByPaging(int page, int size) {
+        Pageable pagingSort = PageRequest.of(page, size);
+        Page<UserAccount> pageOfUsers = this.userRepository.findAll(pagingSort);
+        return getUserPageResponse(pageOfUsers);
+    }
+
     public UserPageResponseDto findAllByPagingAndFilter(UserPageDto dto) {
+        /*System.out.println("usr: " + getCurrentUser());*/
         Pageable pagingSort = PageRequest.of(dto.getPage(), dto.getSize());
         Specification<UserAccount> specification = this.userSpecification.getUsers(dto.getDto());
         Page<UserAccount> pageOfUsers = this.userRepository.findAll(specification, pagingSort);
-        List<UserAccount> userAccounts = pageOfUsers.getContent();
-        List<UserCreateDTO> dtos = userAccounts.stream()
-                .map(item -> this.modelMapper.map(item, UserCreateDTO.class))
-                .collect(Collectors.toList());
-        return new UserPageResponseDto(dtos, pageOfUsers.getNumber(),
-                (int) pageOfUsers.getTotalElements(), pageOfUsers.getTotalPages());
+        return getUserPageResponse(pageOfUsers);
     }
 
     public List<UserCreateDTO> getAllUsers(){

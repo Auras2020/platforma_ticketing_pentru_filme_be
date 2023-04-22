@@ -25,6 +25,9 @@ public class Theatre {
     @Column(name = "movie_poster")
     private byte[] poster;
 
+    @Column(name = "poster_name")
+    private String posterName;
+
     @Column(name = "location", nullable = false)
     private String location;
 

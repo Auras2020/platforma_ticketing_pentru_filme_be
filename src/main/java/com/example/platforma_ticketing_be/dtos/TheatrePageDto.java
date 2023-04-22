@@ -1,0 +1,15 @@
+package com.example.platforma_ticketing_be.dtos;
+
+import lombok.*;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+public class TheatrePageDto {
+
+    private TheatreFilterDto dto;
+    private int page;
+    private int size;
+}

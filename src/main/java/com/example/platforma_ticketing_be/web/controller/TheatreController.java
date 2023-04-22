@@ -1,8 +1,9 @@
 package com.example.platforma_ticketing_be.web.controller;
 
-import com.example.platforma_ticketing_be.dtos.TheatreDto;
+import com.example.platforma_ticketing_be.dtos.*;
 import com.example.platforma_ticketing_be.entities.Theatre;
 import com.example.platforma_ticketing_be.service.TheatreService;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,8 +26,21 @@ public class TheatreController {
         return this.theatreService.getAllTheatre();
     }
 
-    @PutMapping()
-    public Theatre create(@RequestParam("photo") MultipartFile file, @RequestBody TheatreDto theatreDto) throws IOException {
+    @PostMapping("/page/filter")
+    public TheatrePageResponseDto getAllTheatresBySpecsPage(
+            @RequestBody TheatrePageDto dto) {
+        return this.theatreService.findAllByPagingAndFilter(dto);
+    }
+
+    @GetMapping("/page")
+    public TheatrePageResponseDto getAllTheatresPage(
+            @RequestParam int page,
+            @RequestParam int size) {
+        return this.theatreService.findAllByPaging(page, size);
+    }
+
+    @PutMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public Theatre create(@RequestPart("photo") MultipartFile file, @RequestPart("theatre") TheatreDto theatreDto) throws IOException {
         return this.theatreService.create(file, theatreDto);
     }
 

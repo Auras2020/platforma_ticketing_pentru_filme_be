@@ -24,6 +24,30 @@ public class UserSpecificationImpl {
         return false;
     }
 
+    private String getLeftAgeInterval(String ageInterval){
+        if(ageInterval.contains("-")){
+            String[] ageValues = ageInterval.split("-");
+            System.out.println(ageValues[0]);
+            return ageValues[0];
+        } else if(ageInterval.contains("<")){
+            return "<";
+        } else {
+            return ">";
+        }
+    }
+
+    private Integer getRightAgeInterval(String ageInterval){
+        if(ageInterval.contains("-")){
+            String[] ageValues = ageInterval.split("-");
+            System.out.println(ageValues[1]);
+            return Integer.parseInt(ageValues[1]);
+        } else if(ageInterval.contains("<")){
+            return 12;
+        } else {
+            return 18;
+        }
+    }
+
     public Specification<UserAccount> getUsers(UserFilterDto dto) {
         return (root, query, builder) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -43,6 +67,16 @@ public class UserSpecificationImpl {
             }
             if (dto.getEmail() != null && !dto.getEmail().isEmpty()) {
                 predicates.add(builder.like(builder.lower(root.get("email")), dto.getEmail().toLowerCase() + "%"));
+            }
+            if (dto.getAgeInterval() != null && !dto.getAgeInterval().isEmpty()) {
+                if(getLeftAgeInterval(dto.getAgeInterval()).equals("<")){
+                    predicates.add(builder.lt(root.get("age"), getRightAgeInterval(dto.getAgeInterval())));
+                } else if(getLeftAgeInterval(dto.getAgeInterval()).equals(">")){
+                    predicates.add(builder.ge(root.get("age"), getRightAgeInterval(dto.getAgeInterval())));
+                } else {
+                    predicates.add(builder.ge(root.get("age"), Integer.parseInt(getLeftAgeInterval(dto.getAgeInterval()))));
+                    predicates.add(builder.lt(root.get("age"), getRightAgeInterval(dto.getAgeInterval())));
+                }
             }
 
             if ((dto.getSearchString() != null) && !(dto.getSearchString().isEmpty())) {
