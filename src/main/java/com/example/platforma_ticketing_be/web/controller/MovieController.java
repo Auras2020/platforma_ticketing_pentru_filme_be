@@ -1,8 +1,9 @@
 package com.example.platforma_ticketing_be.web.controller;
 
-import com.example.platforma_ticketing_be.dtos.MovieDto;
+import com.example.platforma_ticketing_be.dtos.*;
 import com.example.platforma_ticketing_be.entities.Movie;
 import com.example.platforma_ticketing_be.service.MovieService;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,13 +21,21 @@ public class MovieController {
         this.movieService = movieService;
     }
 
-    @GetMapping
-    public List<MovieDto> getAllMoview(){
-        return this.movieService.getAllMovies();
+    @PostMapping("/page/filter")
+    public MoviePageResponseDto getAllMoviesBySpecsPage(
+            @RequestBody MoviePageDto dto) {
+        return this.movieService.findAllByPagingAndFilter(dto);
     }
 
-    @PutMapping()
-    public Movie create(@RequestParam("photo") MultipartFile file, @RequestBody MovieDto movieDto) throws IOException {
+    @GetMapping("/page")
+    public MoviePageResponseDto getAllMoviesPage(
+            @RequestParam int page,
+            @RequestParam int size) {
+        return this.movieService.findAllByPaging(page, size);
+    }
+
+    @PutMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public Movie create(@RequestPart("photo") MultipartFile file, @RequestPart("movie") MovieDto movieDto) throws IOException {
         return this.movieService.create(file, movieDto);
     }
 

@@ -51,10 +51,10 @@ public class UserController {
         return this.userService.create(userCreateDTO);
     }
 
-    @PostMapping()
+   /* @PostMapping()
     public void update(@RequestBody UserAccount userDTO){
         this.userService.update(userDTO);
-    }
+    }*/
 
     @DeleteMapping(value = "/{email}")
     public void delete(@PathVariable("email") String email){

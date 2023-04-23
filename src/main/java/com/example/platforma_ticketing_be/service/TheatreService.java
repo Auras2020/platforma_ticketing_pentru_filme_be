@@ -2,7 +2,6 @@ package com.example.platforma_ticketing_be.service;
 
 import com.example.platforma_ticketing_be.dtos.*;
 import com.example.platforma_ticketing_be.entities.Theatre;
-import com.example.platforma_ticketing_be.entities.UserAccount;
 import com.example.platforma_ticketing_be.repository.TheatreRepository;
 import com.example.platforma_ticketing_be.repository.TheatreSpecificationImpl;
 import org.modelmapper.ModelMapper;
@@ -71,10 +70,6 @@ public class TheatreService {
         theatreRepository.save(theatre);
         return theatre;
     }
-
-    /*public void update(Movie movie){
-        this.movieRepository.save(movie);
-    }*/
 
     public void delete(Long id){
         Optional<Theatre> theatreOptional = theatreRepository.findById(id);

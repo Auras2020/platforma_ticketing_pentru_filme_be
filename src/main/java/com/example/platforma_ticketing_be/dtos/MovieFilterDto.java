@@ -2,22 +2,19 @@ package com.example.platforma_ticketing_be.dtos;
 
 import lombok.*;
 
-import javax.persistence.Column;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class MovieDto {
+public class MovieFilterDto {
+
     private String name;
-    private int rating;
-    private int recommendedAge;
-    private byte[] poster;
+    private String recommendedAge;
     private String genre;
-    private int duration;
+    private String duration;
     private String actors;
     private String director;
     private String synopsis;
-    private Long note;
+    private String searchString;
 }

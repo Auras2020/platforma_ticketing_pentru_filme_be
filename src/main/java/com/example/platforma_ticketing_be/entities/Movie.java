@@ -23,10 +23,16 @@ public class Movie {
     @Column(name = "rating")
     private int rating;
 
+    @Column(name = "recommended_age", nullable = false)
+    private int recommendedAge;
+
     @Lob
     @Type(type = "org.hibernate.type.BinaryType")
     @Column(name = "movie_poster")
     private byte[] poster;
+
+    @Column(name = "poster_name")
+    private String posterName;
 
     @Column(name = "genre", nullable = false)
     private String genre;

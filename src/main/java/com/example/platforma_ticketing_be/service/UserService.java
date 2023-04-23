@@ -39,7 +39,7 @@ public class UserService {
         return userAccount;
     }
 
-    public void update(UserAccount dto){
+   /* public void update(UserAccount dto){
         Optional<UserAccount> userAccountOptional = userRepository.findById(dto.getId());
         UserAccount userAccount = this.modelMapper.map(dto, UserAccount.class);
         userAccount.setId(dto.getId());
@@ -52,9 +52,9 @@ public class UserService {
         }
 
         this.userRepository.save(userAccount);
-    }
+    }*/
 
-    public UserAccount getCurrentUser() {
+/*    public UserAccount getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
             Object principal = authentication.getPrincipal();
@@ -67,7 +67,7 @@ public class UserService {
 
         }
         return null;
-    }
+    }*/
 
     private UserPageResponseDto getUserPageResponse(Page<UserAccount> pageOfUsers){
         List<UserAccount> users = pageOfUsers.getContent();
@@ -85,7 +85,6 @@ public class UserService {
     }
 
     public UserPageResponseDto findAllByPagingAndFilter(UserPageDto dto) {
-        /*System.out.println("usr: " + getCurrentUser());*/
         Pageable pagingSort = PageRequest.of(dto.getPage(), dto.getSize());
         Specification<UserAccount> specification = this.userSpecification.getUsers(dto.getDto());
         Page<UserAccount> pageOfUsers = this.userRepository.findAll(specification, pagingSort);
