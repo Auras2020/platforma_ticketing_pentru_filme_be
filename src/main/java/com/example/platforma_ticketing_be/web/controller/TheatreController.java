@@ -39,15 +39,15 @@ public class TheatreController {
         return this.theatreService.findAllByPaging(page, size);
     }
 
+    @GetMapping("/{id}")
+    public TheatreDto getTheatreById(@PathVariable("id") Long id){
+        return this.theatreService.getTheatreById(id);
+    }
+
     @PutMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public Theatre create(@RequestPart("photo") MultipartFile file, @RequestPart("theatre") TheatreDto theatreDto) throws IOException {
         return this.theatreService.create(file, theatreDto);
     }
-
-    /*@PostMapping()
-    public void update(@RequestBody UserAccount userDTO){
-        this.userService.update(userDTO);
-    }*/
 
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<Object> delete(@PathVariable("id") Long id){

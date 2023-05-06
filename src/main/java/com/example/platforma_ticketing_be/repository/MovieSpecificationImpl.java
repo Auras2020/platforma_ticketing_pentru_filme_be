@@ -13,14 +13,6 @@ import java.util.List;
 @Component
 public class MovieSpecificationImpl {
 
-    private String getAgeLimit(String ageLimit){
-        if(ageLimit.contains("<")){
-            return "<";
-        } else {
-            return ageLimit.substring(2);
-        }
-    }
-
     private boolean checkIfMovieGenreExists(String genre) {
         for (MovieGenre movieGenre : MovieGenre.values()) {
             if (movieGenre.name().equals(genre))
@@ -62,17 +54,12 @@ public class MovieSpecificationImpl {
                 predicates.add(builder.like(builder.lower(root.get("name")), dto.getName().toLowerCase() + "%"));
             }
             if (dto.getRecommendedAge() != null && !dto.getRecommendedAge().isEmpty()) {
-                if(getAgeLimit(dto.getRecommendedAge()).equals("<")){
-                    predicates.add(builder.lt(root.get("recommended_age"), 12));
-                } else {
-                    int ageLimit = Integer.parseInt(getAgeLimit(dto.getRecommendedAge()));
-                    predicates.add(builder.ge(root.get("recommended_age"), ageLimit));
-                }
+                predicates.add(builder.equal((root.get("recommendedAge")), dto.getRecommendedAge()));
             }
             if (dto.getGenre() != null && !dto.getGenre().isEmpty()) {
                 if (checkIfMovieGenreExists(dto.getGenre().toUpperCase())){
                     predicates.add(
-                            builder.equal(root.get("genre"), dto.getGenre().toUpperCase()));
+                            builder.equal(builder.upper(root.get("genre")), dto.getGenre().toUpperCase()));
                 } else{
                     throw new EnumConstantNotPresentException(
                             MovieGenre.class, dto.getGenre() + " does not exists");
@@ -84,8 +71,8 @@ public class MovieSpecificationImpl {
                 } else if(dto.getDuration().contains(">")){
                     predicates.add(builder.gt(root.get("duration"), getLeftDurationInterval(dto.getDuration())));
                 } else {
-                    predicates.add(builder.ge(root.get("age"), getLeftDurationInterval(dto.getDuration())));
-                    predicates.add(builder.le(root.get("age"), getRightDurationInterval(dto.getDuration())));
+                    predicates.add(builder.ge(root.get("duration"), getLeftDurationInterval(dto.getDuration())));
+                    predicates.add(builder.le(root.get("duration"), getRightDurationInterval(dto.getDuration())));
                 }
             }
             if (dto.getActors() != null && !dto.getActors().isEmpty()) {
@@ -95,7 +82,7 @@ public class MovieSpecificationImpl {
                 predicates.add(builder.like(builder.lower(root.get("director")), dto.getDirector().toLowerCase() + "%"));
             }
             if (dto.getSynopsis() != null && !dto.getSynopsis().isEmpty()) {
-                predicates.add(builder.like(builder.lower(root.get("synopsis")), dto.getSynopsis().toLowerCase() + "%"));
+                predicates.add(builder.like(builder.lower(root.get("synopsis")), "%" + dto.getSynopsis().toLowerCase() + "%"));
             }
 
             if ((dto.getSearchString() != null) && !(dto.getSearchString().isEmpty())) {

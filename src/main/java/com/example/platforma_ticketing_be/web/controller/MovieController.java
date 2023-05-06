@@ -3,11 +3,16 @@ package com.example.platforma_ticketing_be.web.controller;
 import com.example.platforma_ticketing_be.dtos.*;
 import com.example.platforma_ticketing_be.entities.Movie;
 import com.example.platforma_ticketing_be.service.MovieService;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
@@ -27,6 +32,11 @@ public class MovieController {
         return this.movieService.findAllByPagingAndFilter(dto);
     }
 
+    @GetMapping
+    public List<MovieDto> getAllMovies(){
+        return this.movieService.getAllMovies();
+    }
+
     @GetMapping("/page")
     public MoviePageResponseDto getAllMoviesPage(
             @RequestParam int page,
@@ -34,19 +44,34 @@ public class MovieController {
         return this.movieService.findAllByPaging(page, size);
     }
 
-    @PutMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public Movie create(@RequestPart("photo") MultipartFile file, @RequestPart("movie") MovieDto movieDto) throws IOException {
-        return this.movieService.create(file, movieDto);
+    @GetMapping("/videos/{fileName:.+}")
+    public ResponseEntity<InputStreamResource> getVideo(@PathVariable String fileName) throws FileNotFoundException {
+        File videoFile = new File("D:/trailers/" + fileName);
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(videoFile));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + videoFile.getName() + "\"")
+                .contentType(MediaType.parseMediaType("video/mp4"))
+                .body(resource);
     }
 
-   /* @PostMapping()
-    public void update(@RequestBody Movie movie){
-        this.movieService.
-    }*/
+    @PutMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public Movie create(@RequestPart("photo") MultipartFile posterFile, @RequestPart("trailer") String trailerFile, @RequestPart("movie") MovieDto movieDto) throws IOException {
+        return this.movieService.create(posterFile, trailerFile, movieDto);
+    }
 
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<Object> delete(@PathVariable("id") Long id){
         this.movieService.delete(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}")
+    public MovieDto getMovieById(@PathVariable("id") Long id){
+        return this.movieService.getMovieById(id);
+    }
+
+    @PostMapping("movies-and-times")
+    public List<MoviesTimesDto> getAllMoviesFromATheatreAtAGivenDay(@RequestBody TheatreDayDto theatreDayDto){
+        return this.movieService.getAllMoviesFromATheatreAtAGivenDay(theatreDayDto.getMovieFilter(), theatreDayDto.getTheatreId(), theatreDayDto.getDay());
     }
 }

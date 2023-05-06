@@ -10,14 +10,17 @@ import javax.persistence.Column;
 @NoArgsConstructor
 @ToString
 public class MovieDto {
+    private Long id;
     private String name;
-    private int rating;
-    private int recommendedAge;
+    private double rating;
+    private String recommendedAge;
     private byte[] poster;
+    private String posterName;
     private String genre;
     private int duration;
     private String actors;
     private String director;
     private String synopsis;
-    private Long note;
+    private double note;
+    private String trailerName;
 }

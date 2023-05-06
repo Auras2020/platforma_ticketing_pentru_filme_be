@@ -2,12 +2,11 @@ package com.example.platforma_ticketing_be.service;
 
 import com.example.platforma_ticketing_be.dtos.*;
 import com.example.platforma_ticketing_be.entities.Movie;
-import com.example.platforma_ticketing_be.entities.Theatre;
+import com.example.platforma_ticketing_be.entities.ShowTiming;
 import com.example.platforma_ticketing_be.repository.MovieRepository;
 import com.example.platforma_ticketing_be.repository.MovieSpecificationImpl;
+import com.example.platforma_ticketing_be.repository.ShowTimingRepository;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,24 +14,36 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.io.IOException;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class MovieService {
-    private static final Logger LOG = LoggerFactory.getLogger(MovieService.class);
     private final MovieRepository movieRepository;
     private final ModelMapper modelMapper;
     private final MovieSpecificationImpl movieSpecification;
+    private final ShowTimingRepository showTimingRepository;
+    @PersistenceContext
+    private EntityManager entityManager;
 
-    public MovieService(MovieRepository movieRepository, ModelMapper modelMapper, MovieSpecificationImpl movieSpecification) {
+    public MovieService(MovieRepository movieRepository, ModelMapper modelMapper, MovieSpecificationImpl movieSpecification, ShowTimingRepository showTimingRepository) {
         this.movieRepository = movieRepository;
         this.modelMapper = modelMapper;
         this.movieSpecification = movieSpecification;
+        this.showTimingRepository = showTimingRepository;
+    }
+
+    public List<MovieDto> getAllMovies(){
+        List<Movie> movies = movieRepository.findAll();
+        return movies.stream().map(movie -> this.modelMapper.map(movie, MovieDto.class)).collect(Collectors.toList());
     }
 
     private MoviePageResponseDto getMoviePageResponse(Page<Movie> pageOfMovies){
@@ -57,17 +68,32 @@ public class MovieService {
         return getMoviePageResponse(pageOfMovies);
     }
 
-    public Movie create(MultipartFile file, MovieDto movieDto) throws IOException {
-        changePhoto(file, movieDto);
-        Movie movie = this.modelMapper.map(movieDto, Movie.class);
-        movie.setPosterName(file.getOriginalFilename());
+    public Movie create(MultipartFile posterFile, String trailerFile, MovieDto movieDto) throws IOException {
+        Movie movie;
+        if(movieDto.getId() != null){
+            if(this.movieRepository.findById(movieDto.getId()).isPresent()){
+                movie = this.movieRepository.findById(movieDto.getId()).get();
+                if(this.checkIfUploadedFileIsOfImageType(posterFile)){
+                    movieDto.setPoster(posterFile.getBytes());
+                    movieDto.setPosterName(posterFile.getOriginalFilename());
+                } else if(posterFile.isEmpty()){
+                    movieDto.setPoster(movie.getPoster());
+                    movieDto.setPosterName(movie.getPosterName());
+                }
+            }
+        } else {
+            if(this.checkIfUploadedFileIsOfImageType(posterFile)){
+                movieDto.setPoster(posterFile.getBytes());
+                movieDto.setPosterName(posterFile.getOriginalFilename());
+            }
+        }
+        if(trailerFile != null){
+            movieDto.setTrailerName(trailerFile);
+        }
+        movie = this.modelMapper.map(movieDto, Movie.class);
         movieRepository.save(movie);
         return movie;
     }
-
-    /*public void update(Movie movie){
-        this.movieRepository.save(movie);
-    }*/
 
     public void delete(Long id){
         Optional<Movie> movieOptional = movieRepository.findById(id);
@@ -77,14 +103,61 @@ public class MovieService {
         movieRepository.deleteById(id);
     }
 
-    private void checkImage(MultipartFile file) {
-        if (!Objects.requireNonNull(file.getContentType()).contains("image")) {
-            LOG.info("{} is not of image type!!!", file.getName());
-        }
+    private boolean checkIfUploadedFileIsOfImageType(MultipartFile file) {
+        return Objects.requireNonNull(file.getContentType()).contains("image");
     }
 
-    private void changePhoto(MultipartFile file, MovieDto movieDto) throws IOException {
-        this.checkImage(file);
-        movieDto.setPoster(file.getBytes());
+    private boolean checkIfUploadedFileIsOfVideoType(MultipartFile file) {
+        return Objects.requireNonNull(file.getContentType()).contains("video");
+    }
+
+    public MovieDto getMovieById(Long id){
+        if(this.movieRepository.findById(id).isPresent()){
+            return this.modelMapper.map(this.movieRepository.findById(id).get(), MovieDto.class);
+        }
+        return null;
+    }
+
+    public List<Movie> filterMovies(Set<Movie> movies, Specification<Movie> specification) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Movie> query = builder.createQuery(Movie.class);
+        Root<Movie> root = query.from(Movie.class);
+
+        Predicate predicate = specification.toPredicate(root, query, builder);
+        query.where(predicate);
+
+        List<Movie> filteredMovies = new ArrayList<>();
+        for (Movie movie : movies) {
+            Predicate moviePredicate = builder.and(predicate, builder.equal(root, movie));
+            query.where(moviePredicate);
+
+            List<Movie> result = entityManager.createQuery(query).getResultList();
+            if (!result.isEmpty()) {
+                filteredMovies.add(movie);
+            }
+        }
+
+        return filteredMovies;
+    }
+
+    public List<MoviesTimesDto> getAllMoviesFromATheatreAtAGivenDay(MovieFilterDto movieFilterDto, Long theatreId, Date day){
+        List<MoviesTimesDto> moviesTimesDtos = new ArrayList<>();
+        Specification<Movie> specification = this.movieSpecification.getMovies(movieFilterDto);
+        Set<Movie> movies = this.showTimingRepository.getAllMoviesFromATheatre(theatreId).stream()
+                .filter(showTiming -> showTiming.getDay().getDate() == day.getDate() && showTiming.getDay().getMonth() == day.getMonth())
+                .map(ShowTiming::getMovie)
+                .collect(Collectors.toSet());
+
+        List<Movie> filteredMovies = filterMovies(movies, specification);
+
+        for(Movie movie: filteredMovies){
+            List<String> times = this.showTimingRepository.getAllTimesOfAMovieInADayFromATheatre(theatreId, movie.getId())
+                    .stream()
+                    .filter(showTiming1 -> showTiming1.getDay().getDate() == day.getDate() && showTiming1.getDay().getMonth() == day.getMonth())
+                    .map(ShowTiming::getTime)
+                    .toList();
+            moviesTimesDtos.add(new MoviesTimesDto(this.modelMapper.map(movie, MovieDto.class), times));
+        }
+        return moviesTimesDtos;
     }
 }

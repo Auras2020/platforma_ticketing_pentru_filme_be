@@ -1,13 +1,12 @@
 package com.example.platforma_ticketing_be.web.controller;
 
+import com.example.platforma_ticketing_be.dtos.DashboardDto;
 import com.example.platforma_ticketing_be.dtos.UserCreateDTO;
 import com.example.platforma_ticketing_be.dtos.UserPageDto;
 import com.example.platforma_ticketing_be.dtos.UserPageResponseDto;
 import com.example.platforma_ticketing_be.entities.UserAccount;
 import com.example.platforma_ticketing_be.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,11 +21,6 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-
-   /* @GetMapping("/current")
-    public UserAccount getCurrentUser(){
-        return this.userService.getCurrentUser();
-    }*/
 
     @GetMapping
     public List<UserCreateDTO> getAllUsers(){
@@ -51,13 +45,18 @@ public class UserController {
         return this.userService.create(userCreateDTO);
     }
 
-   /* @PostMapping()
-    public void update(@RequestBody UserAccount userDTO){
-        this.userService.update(userDTO);
-    }*/
-
     @DeleteMapping(value = "/{email}")
     public void delete(@PathVariable("email") String email){
         this.userService.delete(email);
+    }
+
+    @GetMapping("/dashboard")
+    public DashboardDto getCurrentInfo(){
+        return this.userService.getCurrentInfo();
+    }
+
+    @GetMapping("/{email}")
+    public UserAccount getUserByEmail(@PathVariable("email") String email){
+        return this.userService.findByEmail(email);
     }
 }

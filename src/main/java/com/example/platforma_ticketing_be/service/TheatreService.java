@@ -64,9 +64,23 @@ public class TheatreService {
     }
 
     public Theatre create(MultipartFile file, TheatreDto theatreDto) throws IOException {
-        changePhoto(file, theatreDto);
-        Theatre theatre = this.modelMapper.map(theatreDto, Theatre.class);
-        theatre.setPosterName(file.getOriginalFilename());
+        Theatre theatre;
+        if(theatreDto.getId() != null){
+            if(this.theatreRepository.findById(theatreDto.getId()).isPresent()){
+                theatre = this.theatreRepository.findById(theatreDto.getId()).get();
+                if(this.checkIfUploadedFileIsOfImageType(file)){
+                    theatreDto.setPoster(file.getBytes());
+                    theatreDto.setPosterName(file.getOriginalFilename());
+                } else if(file.isEmpty()){
+                    theatreDto.setPoster(theatre.getPoster());
+                    theatreDto.setPosterName(theatre.getPosterName());
+                }
+            }
+        } else if(this.checkIfUploadedFileIsOfImageType(file)){
+            theatreDto.setPoster(file.getBytes());
+            theatreDto.setPosterName(file.getOriginalFilename());
+        }
+        theatre = this.modelMapper.map(theatreDto, Theatre.class);
         theatreRepository.save(theatre);
         return theatre;
     }
@@ -79,14 +93,14 @@ public class TheatreService {
         theatreRepository.deleteById(id);
     }
 
-    private void checkImage(MultipartFile file) {
-        if (!Objects.requireNonNull(file.getContentType()).contains("image")) {
-            LOG.info("{} is not of image type!!!", file.getName());
-        }
+    private boolean checkIfUploadedFileIsOfImageType(MultipartFile file) {
+        return Objects.requireNonNull(file.getContentType()).contains("image");
     }
 
-    private void changePhoto(MultipartFile file, TheatreDto theatreDto) throws IOException {
-        this.checkImage(file);
-        theatreDto.setPoster(file.getBytes());
+    public TheatreDto getTheatreById(Long id){
+        if(this.theatreRepository.findById(id).isPresent()){
+            return this.modelMapper.map(this.theatreRepository.findById(id).get(), TheatreDto.class);
+        }
+        return null;
     }
 }

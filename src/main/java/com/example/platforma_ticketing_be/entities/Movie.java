@@ -21,10 +21,10 @@ public class Movie {
     private String name;
 
     @Column(name = "rating")
-    private int rating;
+    private double rating;
 
     @Column(name = "recommended_age", nullable = false)
-    private int recommendedAge;
+    private String recommendedAge;
 
     @Lob
     @Type(type = "org.hibernate.type.BinaryType")
@@ -50,5 +50,8 @@ public class Movie {
     private String synopsis;
 
     @Column(name = "note")
-    private Long note;
+    private double note;
+
+    @Column(name = "trailer_name")
+    private String trailerName;
 }

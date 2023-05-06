@@ -14,4 +14,6 @@ public class TheatreDto {
     private String posterName;
     private String location;
     private String address;
+    private String email;
+    private String phone;
 }

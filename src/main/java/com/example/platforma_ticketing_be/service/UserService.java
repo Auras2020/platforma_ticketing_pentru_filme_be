@@ -3,6 +3,8 @@ package com.example.platforma_ticketing_be.service;
 import com.example.platforma_ticketing_be.dtos.*;
 import com.example.platforma_ticketing_be.entities.UserAccount;
 import com.example.platforma_ticketing_be.entities.UserRole;
+import com.example.platforma_ticketing_be.repository.MovieRepository;
+import com.example.platforma_ticketing_be.repository.TheatreRepository;
 import com.example.platforma_ticketing_be.repository.UserRepository;
 import com.example.platforma_ticketing_be.repository.UserSpecificationImpl;
 import org.modelmapper.ModelMapper;
@@ -10,13 +12,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,11 +23,15 @@ public class UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final UserSpecificationImpl userSpecification;
+    private final TheatreRepository theatreRepository;
+    private final MovieRepository movieRepository;
 
-    public UserService(UserRepository userRepository, ModelMapper modelMapper, UserSpecificationImpl userSpecification) {
+    public UserService(UserRepository userRepository, ModelMapper modelMapper, UserSpecificationImpl userSpecification, TheatreRepository theatreRepository, MovieRepository movieRepository) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
         this.userSpecification = userSpecification;
+        this.theatreRepository = theatreRepository;
+        this.movieRepository = movieRepository;
     }
 
     public UserAccount create(UserCreateDTO userCreateDTO){
@@ -38,36 +40,6 @@ public class UserService {
         userRepository.save(userAccount);
         return userAccount;
     }
-
-   /* public void update(UserAccount dto){
-        Optional<UserAccount> userAccountOptional = userRepository.findById(dto.getId());
-        UserAccount userAccount = this.modelMapper.map(dto, UserAccount.class);
-        userAccount.setId(dto.getId());
-
-        if(userAccountOptional.get().getPassword()!=null){
-            userAccount.setPassword(userAccountOptional.get().getPassword());
-        }
-        else {
-            userAccount.setPassword("");
-        }
-
-        this.userRepository.save(userAccount);
-    }*/
-
-/*    public UserAccount getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            Object principal = authentication.getPrincipal();
-
-                // Cast the principal to your user model class
-
-                System.out.println("eee " + principal);
-                return this.userRepository.findByEmail(principal + "");
-                // ...
-
-        }
-        return null;
-    }*/
 
     private UserPageResponseDto getUserPageResponse(Page<UserAccount> pageOfUsers){
         List<UserAccount> users = pageOfUsers.getContent();
@@ -99,5 +71,16 @@ public class UserService {
     public void delete(String email){
        UserAccount user = userRepository.findByEmail(email);
        userRepository.delete(user);
+    }
+
+    public DashboardDto getCurrentInfo(){
+        int theatres = this.theatreRepository.findAll().size();
+        int movies = this.movieRepository.findAll().size();
+        int users = this.userRepository.findAll().size();
+        return new DashboardDto(theatres, movies, users);
+    }
+
+    public UserAccount findByEmail(String email){
+        return this.userRepository.findByEmail(email);
     }
 }

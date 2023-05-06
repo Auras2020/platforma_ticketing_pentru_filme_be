@@ -33,4 +33,10 @@ public class Theatre {
 
     @Column(name = "address", nullable = false)
     private String address;
+
+    @Column(name = "email", nullable = false)
+    private String email;
+
+    @Column(name = "phone", nullable = false)
+    private String phone;
 }
