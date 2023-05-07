@@ -16,10 +16,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class TheatreService {
@@ -102,5 +104,15 @@ public class TheatreService {
             return this.modelMapper.map(this.theatreRepository.findById(id).get(), TheatreDto.class);
         }
         return null;
+    }
+
+    public List<String> getAllTheatresLocations(){
+        return this.theatreRepository.getAllTheatresLocations();
+    }
+
+    public List<TheatreDto> getTheatresByLocation(String location){
+        return this.theatreRepository.getDistinctByLocation(location).stream()
+                .map(theatre -> this.modelMapper.map(theatre, TheatreDto.class))
+                .collect(Collectors.toList());
     }
 }

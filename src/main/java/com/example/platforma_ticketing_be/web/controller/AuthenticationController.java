@@ -31,19 +31,16 @@ public class AuthenticationController {
 
     @PostMapping("/logout-user")
     public void logout() {
-        System.out.println("here");
         authentificationService.logout();
     }
 
     @PostMapping("/forgot-password")
     public void sendForgotPasswordEmail(@RequestBody EmailDto emailDto){
-        System.out.println(emailDto);
         this.emailService.sendEmail(emailDto.getSubject(), emailDto.getBody(), emailDto.getEmail());
     }
 
     @PostMapping("/reset-password")
     public void resetPassword(@RequestBody ResetPasswordDto resetPasswordDto){
-        System.out.println(resetPasswordDto);
         this.authentificationService.resetPassword(resetPasswordDto.getSubject(), resetPasswordDto.getBody(),
                 resetPasswordDto.getEmail(), resetPasswordDto.getPassword());
     }

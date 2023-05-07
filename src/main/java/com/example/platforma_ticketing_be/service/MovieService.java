@@ -140,6 +140,15 @@ public class MovieService {
         return filteredMovies;
     }
 
+    private boolean hourAndMinuteBiggerThanCurrentDate(String time){
+        if(time == null){
+            return false;
+        }
+        int hour = Integer.parseInt(time.substring(0, 2));
+        int minute = Integer.parseInt(time.substring(3, 5));
+        return hour > new Date().getHours() || (hour == new Date().getHours() && minute > new Date().getMinutes());
+    }
+
     public List<MoviesTimesDto> getAllMoviesFromATheatreAtAGivenDay(MovieFilterDto movieFilterDto, Long theatreId, Date day){
         List<MoviesTimesDto> moviesTimesDtos = new ArrayList<>();
         Specification<Movie> specification = this.movieSpecification.getMovies(movieFilterDto);
@@ -154,10 +163,35 @@ public class MovieService {
             List<String> times = this.showTimingRepository.getAllTimesOfAMovieInADayFromATheatre(theatreId, movie.getId())
                     .stream()
                     .filter(showTiming1 -> showTiming1.getDay().getDate() == day.getDate() && showTiming1.getDay().getMonth() == day.getMonth())
+                    .filter(showTiming1 -> hourAndMinuteBiggerThanCurrentDate(showTiming1.getTime()))
                     .map(ShowTiming::getTime)
                     .toList();
             moviesTimesDtos.add(new MoviesTimesDto(this.modelMapper.map(movie, MovieDto.class), times));
         }
         return moviesTimesDtos;
+    }
+
+    public List<MovieDto> getAllMoviesCurrentlyRunning(MovieFilterDto movieFilterDto){
+        Specification<Movie> specification = this.movieSpecification.getMovies(movieFilterDto);
+        Set<Movie> movies = this.showTimingRepository.findAll().stream()
+                .filter(showTiming -> showTiming.getEndDate().getDate() < new Date().getDate() + 7 && showTiming.getEndDate().getDate() >= new Date().getDate())
+                .map(ShowTiming::getMovie)
+                .collect(Collectors.toSet());
+        List<Movie> filteredMovies = filterMovies(movies, specification);
+        return filteredMovies.stream()
+                .map(movie -> this.modelMapper.map(movie, MovieDto.class))
+                .collect(Collectors.toList());
+    }
+
+    public List<MovieDto> getAllMoviesRunningSoon(MovieFilterDto movieFilterDto){
+        Specification<Movie> specification = this.movieSpecification.getMovies(movieFilterDto);
+        Set<Movie> movies = this.showTimingRepository.findAll().stream()
+                .filter(showTiming -> showTiming.getStartDate().getDate() >= new Date().getDate() + 7)
+                .map(ShowTiming::getMovie)
+                .collect(Collectors.toSet());
+        List<Movie> filteredMovies = filterMovies(movies, specification);
+        return filteredMovies.stream()
+                .map(movie -> this.modelMapper.map(movie, MovieDto.class))
+                .collect(Collectors.toList());
     }
 }

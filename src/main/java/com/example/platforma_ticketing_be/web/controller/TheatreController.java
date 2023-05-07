@@ -44,6 +44,16 @@ public class TheatreController {
         return this.theatreService.getTheatreById(id);
     }
 
+    @GetMapping("/locations")
+    public List<String> getAllTheatresLocations(){
+        return this.theatreService.getAllTheatresLocations();
+    }
+
+    @GetMapping("/filtered/{location}")
+    public List<TheatreDto> getTheatresByLocation(@PathVariable("location") String location){
+        return this.theatreService.getTheatresByLocation(location);
+    }
+
     @PutMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public Theatre create(@RequestPart("photo") MultipartFile file, @RequestPart("theatre") TheatreDto theatreDto) throws IOException {
         return this.theatreService.create(file, theatreDto);

@@ -74,4 +74,14 @@ public class MovieController {
     public List<MoviesTimesDto> getAllMoviesFromATheatreAtAGivenDay(@RequestBody TheatreDayDto theatreDayDto){
         return this.movieService.getAllMoviesFromATheatreAtAGivenDay(theatreDayDto.getMovieFilter(), theatreDayDto.getTheatreId(), theatreDayDto.getDay());
     }
+
+    @PostMapping("/current-running")
+    public List<MovieDto> getAllMoviesCurrentlyRunning(@RequestBody MovieFilterDto movieFilterDto){
+        return this.movieService.getAllMoviesCurrentlyRunning(movieFilterDto);
+    }
+
+    @PostMapping("/soon-running")
+    public List<MovieDto> getAllMoviesRunningSoon(@RequestBody MovieFilterDto movieFilterDto){
+        return this.movieService.getAllMoviesRunningSoon(movieFilterDto);
+    }
 }

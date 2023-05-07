@@ -27,7 +27,6 @@ public class UserSpecificationImpl {
     private String getLeftAgeInterval(String ageInterval){
         if(ageInterval.contains("-")){
             String[] ageValues = ageInterval.split("-");
-            System.out.println(ageValues[0]);
             return ageValues[0];
         } else if(ageInterval.contains("<")){
             return "<";
@@ -39,7 +38,6 @@ public class UserSpecificationImpl {
     private Integer getRightAgeInterval(String ageInterval){
         if(ageInterval.contains("-")){
             String[] ageValues = ageInterval.split("-");
-            System.out.println(ageValues[1]);
             return Integer.parseInt(ageValues[1]);
         } else if(ageInterval.contains("<")){
             return 12;

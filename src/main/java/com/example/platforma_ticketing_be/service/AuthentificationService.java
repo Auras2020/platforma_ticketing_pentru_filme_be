@@ -44,7 +44,6 @@ public class AuthentificationService {
 
     private String createAuthentication(String username, String password, boolean rememberMe, String role){
         UserAccount userAccount = this.userRepository.findByEmailAndPassword(username, password);
-        System.out.println(userAccount);
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("AUTHORITIES_KEY", new SimpleGrantedAuthority(role));
@@ -57,8 +56,6 @@ public class AuthentificationService {
     }
 
     public UserDetail login(String username, String password, boolean rememberMe) {
-        /*List<String> roles = new ArrayList<>();
-        roles.add("client");*/
         UserAccount userAccount = this.userRepository.findByEmailAndPassword(username, password);
             String token = createAuthentication(username, password, rememberMe, userAccount.getRole());
             JwtAccessToken accessToken = new JwtAccessToken(token, jwtSecret);
@@ -66,7 +63,6 @@ public class AuthentificationService {
             SecurityContextHolder.getContext().setAuthentication(authentication);
         userAccount.setToken(token);
         this.userRepository.save(userAccount);
-        System.out.println(((UserDetail) SecurityContextHolder.getContext().getAuthentication().getDetails()).getUsername());
         return (UserDetail) SecurityContextHolder.getContext().getAuthentication().getDetails();
     }
 
@@ -75,7 +71,6 @@ public class AuthentificationService {
     }
 
     public void resetPassword(String subject, String body, String email, String newPassword){
-        System.out.println("e: " + email);
         UserAccount userAccount = this.userRepository.findByEmail(email);
         userAccount.setPassword(newPassword);
         this.userRepository.save(userAccount);
