@@ -57,11 +57,6 @@ public class ShowTimingService {
         return showTiming;
     }
 
-    public List<ShowTimingDto> getAllShowTimings(){
-        List<ShowTiming> showTimings = showTimingRepository.findAll();
-        return showTimings.stream().map(showTiming -> this.modelMapper.map(showTiming, ShowTimingDto.class)).collect(Collectors.toList());
-    }
-
     public void delete(Long id){
         Optional<ShowTiming> showTiming = showTimingRepository.findById(id);
         if(showTiming.isEmpty()){

@@ -163,7 +163,7 @@ public class MovieService {
             List<String> times = this.showTimingRepository.getAllTimesOfAMovieInADayFromATheatre(theatreId, movie.getId())
                     .stream()
                     .filter(showTiming1 -> showTiming1.getDay().getDate() == day.getDate() && showTiming1.getDay().getMonth() == day.getMonth())
-                    .filter(showTiming1 -> hourAndMinuteBiggerThanCurrentDate(showTiming1.getTime()))
+                    .filter(showTiming1 -> day.getDay() != new Date().getDay() || hourAndMinuteBiggerThanCurrentDate(showTiming1.getTime()))
                     .map(ShowTiming::getTime)
                     .toList();
             moviesTimesDtos.add(new MoviesTimesDto(this.modelMapper.map(movie, MovieDto.class), times));

@@ -1,7 +1,6 @@
 package com.example.platforma_ticketing_be.dtos;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.util.Date;
 
 @Getter
