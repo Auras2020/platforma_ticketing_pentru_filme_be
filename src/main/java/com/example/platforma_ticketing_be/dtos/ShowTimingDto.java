@@ -17,4 +17,5 @@ public class ShowTimingDto {
     private String time;
     private Date day;
     private int price;
+    private VenueDto venue;
 }

@@ -12,7 +12,7 @@ import java.util.Date;
 public class VenueFilterDto {
     private String location;
     private String theatreName;
-    private String movieName;
-    private Date day;
+    /*private String movieName;
+    private Date day;*/
     private String searchString;
 }

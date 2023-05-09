@@ -14,11 +14,11 @@ import java.util.Date;
 @ToString
 public class VenueDto {
     private Long id;
-    private String location;
+    //private String location;
     private TheatreDto theatre;
-    private MovieDto movie;
+    /*private MovieDto movie;
     private Date day;
-    private String time;
+    private String time;*/
     private int venueNumber;
     private int rowsNumber;
     private int columnsNumber;

@@ -20,8 +20,11 @@ public class ShowTimingSpecificationImpl {
             List<Predicate> predicates = new ArrayList<>();
             List<Predicate> searchPredicatesList = new ArrayList<>();
 
+            Join<ShowTiming, Theatre> showTimingTheatreJoin = root.join("theatre", JoinType.INNER);
+            if (dto.getTheatreLocation() != null && !dto.getTheatreLocation().isEmpty()) {
+                predicates.add(builder.like(builder.lower(showTimingTheatreJoin.get("location")), dto.getTheatreLocation().toLowerCase() + "%"));
+            }
             if (dto.getTheatreName() != null && !dto.getTheatreName().isEmpty()) {
-                Join<ShowTiming, Theatre> showTimingTheatreJoin = root.join("theatre", JoinType.INNER);
                 predicates.add(builder.like(builder.lower(showTimingTheatreJoin.get("name")), dto.getTheatreName().toLowerCase() + "%"));
             }
             if (dto.getMovieName() != null && !dto.getMovieName().isEmpty()) {
@@ -39,7 +42,9 @@ public class ShowTimingSpecificationImpl {
             }
 
             if ((dto.getSearchString() != null) && !(dto.getSearchString().isEmpty())) {
-                Join<ShowTiming, Theatre> showTimingTheatreJoin = root.join("theatre", JoinType.INNER);
+                //Join<ShowTiming, Theatre> showTimingTheatreJoin = root.join("theatre", JoinType.INNER);
+                searchPredicatesList.add(
+                        builder.like(builder.lower(showTimingTheatreJoin.get("location")), dto.getSearchString().toLowerCase() + "%"));
                 searchPredicatesList.add(
                         builder.like(builder.lower(showTimingTheatreJoin.get("name")), dto.getSearchString().toLowerCase() + "%"));
                 Join<ShowTiming, Movie> showTimingMovieJoin = root.join("movie", JoinType.INNER);

@@ -6,6 +6,8 @@ import com.example.platforma_ticketing_be.entities.Venue;
 import com.example.platforma_ticketing_be.service.VenueService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
+
 @RestController
 @RequestMapping(value = "/venues")
 public class VenueController {
@@ -27,6 +29,11 @@ public class VenueController {
             @RequestParam int page,
             @RequestParam int size) {
         return this.venueService.findAllByPaging(page, size);
+    }
+
+    @GetMapping("/theatre/{id}")
+    public Set<VenueDto> getAllVenueNumbersOfGivenTheatre(@PathVariable("id") Long theatreId){
+        return this.venueService.getAllVenueNumbersOfGivenTheatre(theatreId);
     }
 
     @PutMapping()

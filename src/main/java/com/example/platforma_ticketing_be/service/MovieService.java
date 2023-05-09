@@ -149,6 +149,42 @@ public class MovieService {
         return hour > new Date().getHours() || (hour == new Date().getHours() && minute > new Date().getMinutes());
     }
 
+    public Set<MovieDto> getAllMoviesFromATheatreAtAGivenDay(Long theatreId, Date day){
+        return this.showTimingRepository.getAllMoviesFromATheatreAtAGivenDay(theatreId, day).stream()
+                .map(movie -> this.modelMapper.map(movie, MovieDto.class))
+                .collect(Collectors.toSet());
+    }
+
+    public Set<MovieDto> getAllMoviesFromATheatre(Long theatreId){
+        return this.showTimingRepository.getAllMoviesFromATheatre(theatreId).stream()
+                .map(ShowTiming::getMovie)
+                .map(movie -> this.modelMapper.map(movie, MovieDto.class))
+                .collect(Collectors.toSet());
+    }
+
+    public Set<String> getAllTimesByShowTiming(Long theatreId, Long movieId, Date day){
+        return this.showTimingRepository.getAllTimesByShowTiming(theatreId, movieId, day);
+    }
+
+    /*public List<MoviesTimesDto> getAllMoviesByTheatreIdAtGivenDay(Long theatreId, Date day){
+        List<MoviesTimesDto> moviesTimesDtos = new ArrayList<>();
+        Set<Movie> movies = this.showTimingRepository.getAllMoviesFromATheatre(theatreId).stream()
+                .filter(showTiming -> showTiming.getDay().getDate() == day.getDate() && showTiming.getDay().getMonth() == day.getMonth())
+                .map(ShowTiming::getMovie)
+                .collect(Collectors.toSet());
+
+        for(Movie movie: movies){
+            List<String> times = this.showTimingRepository.getAllTimesOfAMovieInADayFromATheatre(theatreId, movie.getId())
+                    .stream()
+                    .filter(showTiming1 -> showTiming1.getDay().getDate() == day.getDate() && showTiming1.getDay().getMonth() == day.getMonth())
+                    .filter(showTiming1 -> day.getDay() != new Date().getDay() || hourAndMinuteBiggerThanCurrentDate(showTiming1.getTime()))
+                    .map(ShowTiming::getTime)
+                    .toList();
+            moviesTimesDtos.add(new MoviesTimesDto(this.modelMapper.map(movie, MovieDto.class), times));
+        }
+        return moviesTimesDtos;
+    }*/
+
     public List<MoviesTimesDto> getAllMoviesFromATheatreAtAGivenDay(MovieFilterDto movieFilterDto, Long theatreId, Date day){
         List<MoviesTimesDto> moviesTimesDtos = new ArrayList<>();
         Specification<Movie> specification = this.movieSpecification.getMovies(movieFilterDto);

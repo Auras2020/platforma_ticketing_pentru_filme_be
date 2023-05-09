@@ -2,6 +2,7 @@ package com.example.platforma_ticketing_be.web.controller;
 
 import com.example.platforma_ticketing_be.dtos.*;
 import com.example.platforma_ticketing_be.entities.Movie;
+import com.example.platforma_ticketing_be.entities.ShowTiming;
 import com.example.platforma_ticketing_be.service.MovieService;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -14,7 +15,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping(value = "/movies")
@@ -54,6 +57,11 @@ public class MovieController {
                 .body(resource);
     }
 
+    @GetMapping("/theatre/{id}")
+    public Set<MovieDto> getAllMoviesFromATheatre(@PathVariable("id") Long theatreId){
+        return this.movieService.getAllMoviesFromATheatre(theatreId);
+    }
+
     @PutMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public Movie create(@RequestPart("photo") MultipartFile posterFile, @RequestPart("trailer") String trailerFile, @RequestPart("movie") MovieDto movieDto) throws IOException {
         return this.movieService.create(posterFile, trailerFile, movieDto);
@@ -70,9 +78,19 @@ public class MovieController {
         return this.movieService.getMovieById(id);
     }
 
-    @PostMapping("movies-and-times")
+    @PostMapping("/theatre-and-day")
+    public Set<MovieDto> getAllMoviesFromATheatreAtAGivenDay(@RequestBody TheatreIdDayDto theatreIdDayDto){
+        return this.movieService.getAllMoviesFromATheatreAtAGivenDay(theatreIdDayDto.getTheatreId(), theatreIdDayDto.getDay());
+    }
+
+    @PostMapping("/movies-and-times")
     public List<MoviesTimesDto> getAllMoviesFromATheatreAtAGivenDay(@RequestBody TheatreDayDto theatreDayDto){
         return this.movieService.getAllMoviesFromATheatreAtAGivenDay(theatreDayDto.getMovieFilter(), theatreDayDto.getTheatreId(), theatreDayDto.getDay());
+    }
+
+    @PostMapping("/show-timings")
+    public Set<String> getAllTimesByShowTiming(@RequestBody TheatreMovieDayDto theatreMovieDayDto){
+        return this.movieService.getAllTimesByShowTiming(theatreMovieDayDto.getTheatreId(), theatreMovieDayDto.getMovieId(), theatreMovieDayDto.getDay());
     }
 
     @PostMapping("/current-running")

@@ -12,6 +12,7 @@ import java.util.Date;
 @ToString
 public class ShowTimingFilterDto {
     private String movieName;
+    private String theatreLocation;
     private String theatreName;
     private Date startDate;
     private Date endDate;

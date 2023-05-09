@@ -17,14 +17,14 @@ public class Venue {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "location", nullable = false)
-    private String location;
+    /*@Column(name = "location", nullable = false)
+    private String location;*/
 
     @ManyToOne
     @JoinColumn(name="theatre_id", nullable=false)
     private Theatre theatre;
 
-    @ManyToOne
+    /*@ManyToOne
     @JoinColumn(name="movie_id", nullable=false)
     private Movie movie;
 
@@ -32,7 +32,7 @@ public class Venue {
     private Date day;
 
     @Column(name = "time", nullable = false)
-    private String time;
+    private String time;*/
 
     @Column(name = "venue_number", nullable = false)
     private int venueNumber;

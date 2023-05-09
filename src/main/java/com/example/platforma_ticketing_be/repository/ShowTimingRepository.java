@@ -16,6 +16,12 @@ public interface ShowTimingRepository extends JpaRepository<ShowTiming, Long>, J
     @Query("select sh from ShowTiming sh where sh.theatre.id = ?1")
     Set<ShowTiming> getAllMoviesFromATheatre(Long theatreId);
 
+    @Query("select sh.movie from ShowTiming sh where sh.theatre.id = ?1 and sh.day = ?2")
+    Set<Movie> getAllMoviesFromATheatreAtAGivenDay(Long theatreId, Date day);
+
+    @Query("select sh.time from ShowTiming sh where sh.theatre.id = ?1 and sh.movie.id = ?2 and sh.day = ?3 order by sh.time")
+    Set<String> getAllTimesByShowTiming(Long theatreId, Long movieId, Date day);
+
     @Query("select sh from ShowTiming sh where sh.theatre.id = ?1 and sh.movie.id = ?2 order by sh.time")
     List<ShowTiming> getAllTimesOfAMovieInADayFromATheatre(Long theatreId, Long movieId);
 }

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,5 +65,11 @@ public class VenueService {
             throw new EntityNotFoundException(Venue.class.getSimpleName() + " with id: " + id);
         }
         venueRepository.deleteById(id);
+    }
+
+    public Set<VenueDto> getAllVenueNumbersOfGivenTheatre(Long theatreId){
+        return this.venueRepository.getAllVenueNumbersOfGivenTheatre(theatreId).stream()
+                .map(venue -> this.modelMapper.map(venue, VenueDto.class))
+                .collect(Collectors.toSet());
     }
 }
