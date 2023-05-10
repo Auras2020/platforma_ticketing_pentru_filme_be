@@ -13,6 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -71,5 +72,21 @@ public class VenueService {
         return this.venueRepository.getAllVenueNumbersOfGivenTheatre(theatreId).stream()
                 .map(venue -> this.modelMapper.map(venue, VenueDto.class))
                 .collect(Collectors.toSet());
+    }
+
+    public VenueDto getVenueById(Long id){
+        if(this.venueRepository.findById(id).isPresent()){
+            return this.modelMapper.map(this.venueRepository.findById(id).get(), VenueDto.class);
+        }
+        return null;
+    }
+
+    public VenueDto findVenueByShowTimingDetails(Long theatreId, Long movieId, Date day, String time){
+        List<VenueDto> venues = this.venueRepository.findVenueByShowTimingDetails(theatreId, movieId, time).stream()
+                .filter(showTiming -> showTiming.getDay().getDate() == day.getDate() && showTiming.getDay().getMonth() == day.getMonth())
+                .map(ShowTiming::getVenue)
+                .map(venue -> this.modelMapper.map(venue, VenueDto.class))
+                .toList();
+        return venues.isEmpty() ? null : this.modelMapper.map(venues.get(0), VenueDto.class);
     }
 }

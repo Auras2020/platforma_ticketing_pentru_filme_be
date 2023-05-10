@@ -107,10 +107,6 @@ public class MovieService {
         return Objects.requireNonNull(file.getContentType()).contains("image");
     }
 
-    private boolean checkIfUploadedFileIsOfVideoType(MultipartFile file) {
-        return Objects.requireNonNull(file.getContentType()).contains("video");
-    }
-
     public MovieDto getMovieById(Long id){
         if(this.movieRepository.findById(id).isPresent()){
             return this.modelMapper.map(this.movieRepository.findById(id).get(), MovieDto.class);
@@ -165,25 +161,6 @@ public class MovieService {
     public Set<String> getAllTimesByShowTiming(Long theatreId, Long movieId, Date day){
         return this.showTimingRepository.getAllTimesByShowTiming(theatreId, movieId, day);
     }
-
-    /*public List<MoviesTimesDto> getAllMoviesByTheatreIdAtGivenDay(Long theatreId, Date day){
-        List<MoviesTimesDto> moviesTimesDtos = new ArrayList<>();
-        Set<Movie> movies = this.showTimingRepository.getAllMoviesFromATheatre(theatreId).stream()
-                .filter(showTiming -> showTiming.getDay().getDate() == day.getDate() && showTiming.getDay().getMonth() == day.getMonth())
-                .map(ShowTiming::getMovie)
-                .collect(Collectors.toSet());
-
-        for(Movie movie: movies){
-            List<String> times = this.showTimingRepository.getAllTimesOfAMovieInADayFromATheatre(theatreId, movie.getId())
-                    .stream()
-                    .filter(showTiming1 -> showTiming1.getDay().getDate() == day.getDate() && showTiming1.getDay().getMonth() == day.getMonth())
-                    .filter(showTiming1 -> day.getDay() != new Date().getDay() || hourAndMinuteBiggerThanCurrentDate(showTiming1.getTime()))
-                    .map(ShowTiming::getTime)
-                    .toList();
-            moviesTimesDtos.add(new MoviesTimesDto(this.modelMapper.map(movie, MovieDto.class), times));
-        }
-        return moviesTimesDtos;
-    }*/
 
     public List<MoviesTimesDto> getAllMoviesFromATheatreAtAGivenDay(MovieFilterDto movieFilterDto, Long theatreId, Date day){
         List<MoviesTimesDto> moviesTimesDtos = new ArrayList<>();
