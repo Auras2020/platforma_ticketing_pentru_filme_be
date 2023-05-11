@@ -21,11 +21,22 @@ public class ShowTimingController {
         return this.showTimingService.findAllByPagingAndFilter(dto);
     }
 
+    @PostMapping("/show-timing-details")
+    public ShowTimingDto findVenueByShowTimingDetails(@RequestBody ShowTimingVenueDto showTimingVenueDto){
+        return this.showTimingService.findShowTimingByShowTimingDetails(showTimingVenueDto.getTheatreId(), showTimingVenueDto.getMovieId(),
+                showTimingVenueDto.getDay(), showTimingVenueDto.getTime());
+    }
+
     @GetMapping("/page")
     public ShowTimingPageResponseDto getAllShowTimingsPage(
             @RequestParam int page,
             @RequestParam int size) {
         return this.showTimingService.findAllByPaging(page, size);
+    }
+
+    @GetMapping("/{id}")
+    public ShowTimingDto getShowTimingById(@PathVariable("id") Long id){
+        return this.showTimingService.getShowTimingById(id);
     }
 
     @PutMapping()

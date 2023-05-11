@@ -41,12 +41,6 @@ public class VenueController {
         return this.venueService.getVenueById(id);
     }
 
-    @PostMapping("/show-timing")
-    public VenueDto findVenueByShowTimingDetails(@RequestBody ShowTimingVenueDto showTimingVenueDto){
-        return this.venueService.findVenueByShowTimingDetails(showTimingVenueDto.getTheatreId(), showTimingVenueDto.getMovieId(),
-                showTimingVenueDto.getDay(), showTimingVenueDto.getTime());
-    }
-
     @PutMapping()
     public Venue create(@RequestBody VenueDto venueDto){
         return this.venueService.create(venueDto);

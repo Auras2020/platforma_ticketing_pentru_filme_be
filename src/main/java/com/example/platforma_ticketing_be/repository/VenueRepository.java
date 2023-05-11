@@ -17,7 +17,4 @@ public interface VenueRepository extends JpaRepository<Venue, Long>, JpaSpecific
 
     @Query("select v from Venue v where v.theatre.id = ?1")
     Set<Venue> getAllVenueNumbersOfGivenTheatre(Long theatreId);
-
-    @Query("select sh from ShowTiming sh where sh.theatre.id = ?1 and sh.movie.id = ?2 and sh.time = ?3")
-    List<ShowTiming> findVenueByShowTimingDetails(Long theatreId, Long movieId, String time);
 }

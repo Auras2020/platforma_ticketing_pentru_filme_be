@@ -102,4 +102,9 @@ public class MovieController {
     public List<MovieDto> getAllMoviesRunningSoon(@RequestBody MovieFilterDto movieFilterDto){
         return this.movieService.getAllMoviesRunningSoon(movieFilterDto);
     }
+
+    @PostMapping("/age")
+    public List<MovieDto> getRecomendedMovies(@RequestBody MovieFilterAgeDto movieFilterAgeDto){
+        return this.movieService.getRecomendedMovies(movieFilterAgeDto.getMovieFilter(), movieFilterAgeDto.getAge());
+    }
 }

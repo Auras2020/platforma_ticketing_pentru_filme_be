@@ -80,13 +80,4 @@ public class VenueService {
         }
         return null;
     }
-
-    public VenueDto findVenueByShowTimingDetails(Long theatreId, Long movieId, Date day, String time){
-        List<VenueDto> venues = this.venueRepository.findVenueByShowTimingDetails(theatreId, movieId, time).stream()
-                .filter(showTiming -> showTiming.getDay().getDate() == day.getDate() && showTiming.getDay().getMonth() == day.getMonth())
-                .map(ShowTiming::getVenue)
-                .map(venue -> this.modelMapper.map(venue, VenueDto.class))
-                .toList();
-        return venues.isEmpty() ? null : this.modelMapper.map(venues.get(0), VenueDto.class);
-    }
 }

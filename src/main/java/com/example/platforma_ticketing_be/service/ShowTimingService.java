@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -63,5 +64,19 @@ public class ShowTimingService {
             throw new EntityNotFoundException(ShowTiming.class.getSimpleName() + " with id: " + id);
         }
         showTimingRepository.deleteById(id);
+    }
+
+    public ShowTimingDto findShowTimingByShowTimingDetails(Long theatreId, Long movieId, Date day, String time){
+        List<ShowTiming> showTimings = this.showTimingRepository.findShowTimingByShowTimingDetails(theatreId, movieId, time).stream()
+                .filter(showTiming -> showTiming.getDay().getDate() == day.getDate() && showTiming.getDay().getMonth() == day.getMonth())
+                .toList();
+        return showTimings.isEmpty() ? null : this.modelMapper.map(showTimings.get(0), ShowTimingDto.class);
+    }
+
+    public ShowTimingDto getShowTimingById(Long id){
+        if(this.showTimingRepository.findById(id).isPresent()){
+            return this.modelMapper.map(this.showTimingRepository.findById(id).get(), ShowTimingDto.class);
+        }
+        return null;
     }
 }

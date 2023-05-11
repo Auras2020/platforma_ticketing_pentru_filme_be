@@ -207,4 +207,23 @@ public class MovieService {
                 .map(movie -> this.modelMapper.map(movie, MovieDto.class))
                 .collect(Collectors.toList());
     }
+
+    public List<MovieDto> getRecomendedMovies(MovieFilterDto movieFilterDto, int age){
+        String[] categories;
+        if(age < 12){
+            categories = new String[]{"AG"};
+        } else if(age < 15){
+            categories = new String[]{"AG", "AP12"};
+        } else if(age < 18){
+            categories = new String[]{"AG", "AP12", "N15"};
+        } else {
+            categories = new String[]{"AG", "AP12", "N15", "IM18"};
+        }
+        Specification<Movie> specification = this.movieSpecification.getMovies(movieFilterDto);
+        Set<Movie> movies = this.movieRepository.getAllMoviesWithACertainRecommendedAge(categories);
+        List<Movie> filteredMovies = filterMovies(movies, specification);
+        return filteredMovies.stream()
+                .map(movie -> this.modelMapper.map(movie, MovieDto.class))
+                .collect(Collectors.toList());
+    }
 }
