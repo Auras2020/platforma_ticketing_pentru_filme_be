@@ -5,8 +5,10 @@ import com.example.platforma_ticketing_be.dtos.ShowTimingDto;
 import com.example.platforma_ticketing_be.entities.Seat;
 import com.example.platforma_ticketing_be.entities.ShowTiming;
 import com.example.platforma_ticketing_be.service.SeatService;
+import com.lowagie.text.DocumentException;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Set;
 
 @RestController
@@ -20,8 +22,8 @@ public class SeatController {
     }
 
     @PutMapping()
-    public Seat create(@RequestBody SeatDto seatDto){
-        return this.seatService.create(seatDto.getShowTiming(), seatDto.getSeat());
+    public void create(@RequestBody SeatDto seatDto) throws DocumentException, IOException {
+        this.seatService.create(seatDto.getShowTiming(), seatDto.getSeats());
     }
 
     @GetMapping("/{id}")

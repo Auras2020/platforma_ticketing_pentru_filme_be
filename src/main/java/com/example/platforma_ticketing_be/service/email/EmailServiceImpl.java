@@ -3,6 +3,7 @@ package com.example.platforma_ticketing_be.service.email;
 import org.flywaydb.core.internal.resource.filesystem.FileSystemResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -14,6 +15,7 @@ import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -46,7 +48,8 @@ public class EmailServiceImpl implements EmailService{
         sendEmailWithAttachment("hello", "tickets", "andreipop767@gmail.com", "C:/Users/Ovreiu.Au.Auras/Desktop/Lab_09-13.pdf");
     }*/
 
-    public void sendEmailWithAttachment(String subject, String body, String mailTo, String attachmentPath) {
+    @Override
+    public void processEmailWithAttachments(String body, String subject, String mailTo, List<DataSource> attachments) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -56,9 +59,9 @@ public class EmailServiceImpl implements EmailService{
             helper.setSubject(subject);
             helper.setText(body);
 
-            File attachment = new File(attachmentPath);
-            DataSource dataSource = new FileDataSource(attachment);
-            helper.addAttachment("Attachment.pdf", dataSource);
+            //for(int i = 0; i < attachments.size(); i++){
+                helper.addAttachment("Tickets.pdf", attachments.get(0));
+            //}
 
             mailSender.send(message);
 
@@ -66,11 +69,6 @@ public class EmailServiceImpl implements EmailService{
         } catch (MessagingException e) {
             System.err.println("Failed to send email with attachment: " + e.getMessage());
         }
-    }
-
-    @Override
-    public void processEmailWithAttachments(String body, String subject, String mailTo, List<DataSource> attachments) {
-
     }
 
 }

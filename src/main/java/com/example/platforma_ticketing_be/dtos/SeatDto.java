@@ -2,6 +2,8 @@ package com.example.platforma_ticketing_be.dtos;
 
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -9,5 +11,5 @@ import lombok.*;
 @ToString
 public class SeatDto {
     private ShowTimingDto showTiming;
-    private String seat;
+    private List<String> seats;
 }
