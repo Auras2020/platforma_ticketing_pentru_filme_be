@@ -23,7 +23,7 @@ public class SeatController {
 
     @PutMapping()
     public void create(@RequestBody SeatDto seatDto) throws DocumentException, IOException {
-        this.seatService.create(seatDto.getShowTiming(), seatDto.getSeats());
+        this.seatService.create(seatDto.getShowTiming(), seatDto.getSeats(), seatDto.getUser());
     }
 
     @GetMapping("/{id}")
