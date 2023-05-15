@@ -3,6 +3,7 @@ package com.example.platforma_ticketing_be.entities;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 
@@ -18,6 +19,14 @@ public class Product {
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    @Lob
+    @Type(type = "org.hibernate.type.BinaryType")
+    @Column(name = "product_image")
+    private byte[] image;
+
+    @Column(name = "image_name")
+    private String imageName;
 
     @Column(name = "category", nullable = false)
     private String category;

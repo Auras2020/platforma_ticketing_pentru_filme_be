@@ -2,7 +2,6 @@ package com.example.platforma_ticketing_be.web.controller;
 
 import com.example.platforma_ticketing_be.dtos.*;
 import com.example.platforma_ticketing_be.entities.Movie;
-import com.example.platforma_ticketing_be.entities.ShowTiming;
 import com.example.platforma_ticketing_be.service.MovieService;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -15,7 +14,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 

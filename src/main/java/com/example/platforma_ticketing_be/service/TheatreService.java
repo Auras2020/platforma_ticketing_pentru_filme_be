@@ -26,7 +26,6 @@ import java.util.stream.Stream;
 @Service
 public class TheatreService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TheatreService.class);
     private final TheatreRepository theatreRepository;
     private final ModelMapper modelMapper;
     private final TheatreSpecificationImpl theatreSpecification;
