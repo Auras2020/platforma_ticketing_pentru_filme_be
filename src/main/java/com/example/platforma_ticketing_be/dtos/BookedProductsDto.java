@@ -14,4 +14,5 @@ public class BookedProductsDto {
     private ShowTimingDto showTiming;
     private UserAccount user;
     private List<ProductDetailsDto> productDetails;
+    private String status;
 }

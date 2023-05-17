@@ -24,11 +24,6 @@ public class ProductController {
         return this.productService.getProductById(id);
     }
 
-    @PostMapping()
-    public List<ProductDto> getAllProducts(@RequestBody ProductFilterDto productFilterDto){
-        return this.productService.getAllProducts(productFilterDto);
-    }
-
     @PostMapping("/theatre")
     public List<ProductDto> getAllProductsByTheatreId(@RequestBody SearchedTheatreDto searchedTheatreDto){
         return this.productService.getAllProductsByTheatreId(
@@ -38,6 +33,18 @@ public class ProductController {
     @PostMapping("/category-and-theatre")
     public List<ProductDto> getAllProductsByCategoryAndTheatreId(@RequestBody SearchedProductTheatreDto searchedProductTheatreDto){
         return this.productService.getAllProductsByCategoryAndTheatreId(searchedProductTheatreDto.getCategory(),
+                searchedProductTheatreDto.getTheatreId(), searchedProductTheatreDto.getProductFilter());
+    }
+
+    @PostMapping("/theatre/available")
+    public List<ProductDto> getAllProductsAvailableByTheatreId(@RequestBody SearchedTheatreDto searchedTheatreDto){
+        return this.productService.getAllProductsAvailableByTheatreId(
+                searchedTheatreDto.getTheatreId(), searchedTheatreDto.getProductFilter());
+    }
+
+    @PostMapping("/category-and-theatre/available")
+    public List<ProductDto> getAllProductsAvailableByCategoryAndTheatreId(@RequestBody SearchedProductTheatreDto searchedProductTheatreDto){
+        return this.productService.getAllProductsAvailableByCategoryAndTheatreId(searchedProductTheatreDto.getCategory(),
                 searchedProductTheatreDto.getTheatreId(), searchedProductTheatreDto.getProductFilter());
     }
 

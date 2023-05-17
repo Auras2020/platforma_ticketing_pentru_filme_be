@@ -25,6 +25,9 @@ public class Seat {
     @Column(name = "seat", nullable = false)
     private String seat;
 
+    @Column(name = "status", nullable = false)
+    private String status; //[bought, reserved, cancelled]
+
     public Seat(ShowTiming showTiming, String seat, UserAccount user) {
         this.showTiming = showTiming;
         this.seat = seat;

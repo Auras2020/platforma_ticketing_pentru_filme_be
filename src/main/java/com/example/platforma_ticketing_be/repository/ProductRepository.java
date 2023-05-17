@@ -17,5 +17,9 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query("select p from Product p where p.category = ?1 and p.theatre.id = ?2")
     Set<Product> getAllProductsByCategoryAndTheatreId(String category, Long theatreId);
 
+    @Query("select p from Product p where p.theatre.id = ?1 and p.number > 0")
+    Set<Product> getAllProductsAvailableByTheatreId(Long theatreId);
 
+    @Query("select p from Product p where p.category = ?1 and p.theatre.id = ?2 and p.number > 0")
+    Set<Product> getAllProductsAvailableByCategoryAndTheatreId(String category, Long theatreId);
 }

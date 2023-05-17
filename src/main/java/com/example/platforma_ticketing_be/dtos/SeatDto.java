@@ -15,4 +15,5 @@ public class SeatDto {
     private List<String> seats;
     private List<ProductDetailsDto> productDetails;
     private UserAccount user;
+    private String status;
 }

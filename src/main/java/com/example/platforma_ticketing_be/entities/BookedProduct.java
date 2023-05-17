@@ -33,6 +33,9 @@ public class BookedProduct {
     @Column(name = "number", nullable = false)
     private int number;
 
+    @Column(name = "status", nullable = false)
+    private String status; //[bought, reserved, cancelled]
+
     public BookedProduct(ShowTiming showTiming, UserAccount user, String name, int quantity, int number) {
         this.showTiming = showTiming;
         this.user = user;

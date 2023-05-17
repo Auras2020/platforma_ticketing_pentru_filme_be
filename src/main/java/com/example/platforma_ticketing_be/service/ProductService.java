@@ -57,15 +57,6 @@ public class ProductService {
         return filteredProducts;
     }
 
-    public List<ProductDto> getAllProducts(ProductFilterDto productFilterDto){
-        Set<Product> products = new HashSet<>(productRepository.findAll());
-        Specification<Product> specification = this.productSpecification.getProducts(productFilterDto);
-        List<Product> filteredProducts = filterProducts(products, specification);
-        return filteredProducts.stream()
-                .map(product -> this.modelMapper.map(product, ProductDto.class))
-                .collect(Collectors.toList());
-    }
-
     public List<ProductDto> getAllProductsByTheatreId(Long theatreId, ProductFilterDto productFilterDto){
         Set<Product> products = productRepository.getAllProductsByTheatreId(theatreId);
         Specification<Product> specification = this.productSpecification.getProducts(productFilterDto);
@@ -84,12 +75,29 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    public List<ProductDto> getAllProductsAvailableByTheatreId(Long theatreId, ProductFilterDto productFilterDto){
+        Set<Product> products = productRepository.getAllProductsAvailableByTheatreId(theatreId);
+        Specification<Product> specification = this.productSpecification.getProducts(productFilterDto);
+        List<Product> filteredProducts = filterProducts(products, specification);
+        return filteredProducts.stream()
+                .map(product -> this.modelMapper.map(product, ProductDto.class))
+                .collect(Collectors.toList());
+    }
+
+    public List<ProductDto> getAllProductsAvailableByCategoryAndTheatreId(String category, Long theatreId, ProductFilterDto productFilterDto){
+        Set<Product> products = productRepository.getAllProductsAvailableByCategoryAndTheatreId(category, theatreId);
+        Specification<Product> specification = this.productSpecification.getProducts(productFilterDto);
+        List<Product> filteredProducts = filterProducts(products, specification);
+        return filteredProducts.stream()
+                .map(product -> this.modelMapper.map(product, ProductDto.class))
+                .collect(Collectors.toList());
+    }
+
     private boolean checkIfUploadedFileIsOfImageType(MultipartFile file) {
         return Objects.requireNonNull(file.getContentType()).contains("image");
     }
 
     public void create(MultipartFile file, ProductDto productDto) throws IOException {
-        System.out.println(productDto.getNumber());
         Product product;
         if(productDto.getId() != null){
             if(this.productRepository.findById(productDto.getId()).isPresent()){
