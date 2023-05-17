@@ -7,7 +7,8 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class SearchedProductDto {
+public class SearchedProductTheatreDto {
     private String category;
+    private Long theatreId;
     private ProductFilterDto productFilter;
 }

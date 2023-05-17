@@ -1,7 +1,6 @@
 package com.example.platforma_ticketing_be.service;
 
-import com.example.platforma_ticketing_be.dtos.ProductDto;
-import com.example.platforma_ticketing_be.dtos.ProductFilterDto;
+import com.example.platforma_ticketing_be.dtos.*;
 import com.example.platforma_ticketing_be.entities.*;
 import com.example.platforma_ticketing_be.repository.ProductRepository;
 import com.example.platforma_ticketing_be.repository.ProductSpecificationImpl;
@@ -67,8 +66,17 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    public List<ProductDto> getAllProductsByCategory(String category, ProductFilterDto productFilterDto){
-        Set<Product> products = productRepository.getAllProductsByCategory(category);
+    public List<ProductDto> getAllProductsByTheatreId(Long theatreId, ProductFilterDto productFilterDto){
+        Set<Product> products = productRepository.getAllProductsByTheatreId(theatreId);
+        Specification<Product> specification = this.productSpecification.getProducts(productFilterDto);
+        List<Product> filteredProducts = filterProducts(products, specification);
+        return filteredProducts.stream()
+                .map(product -> this.modelMapper.map(product, ProductDto.class))
+                .collect(Collectors.toList());
+    }
+
+    public List<ProductDto> getAllProductsByCategoryAndTheatreId(String category, Long theatreId, ProductFilterDto productFilterDto){
+        Set<Product> products = productRepository.getAllProductsByCategoryAndTheatreId(category, theatreId);
         Specification<Product> specification = this.productSpecification.getProducts(productFilterDto);
         List<Product> filteredProducts = filterProducts(products, specification);
         return filteredProducts.stream()
@@ -81,6 +89,7 @@ public class ProductService {
     }
 
     public void create(MultipartFile file, ProductDto productDto) throws IOException {
+        System.out.println(productDto.getNumber());
         Product product;
         if(productDto.getId() != null){
             if(this.productRepository.findById(productDto.getId()).isPresent()){
@@ -107,5 +116,12 @@ public class ProductService {
             throw new EntityNotFoundException(Product.class.getSimpleName() + " with id: " + id);
         }
         productRepository.deleteById(id);
+    }
+
+    public ProductDto getProductById(Long id){
+        if(this.productRepository.findById(id).isPresent()){
+            return this.modelMapper.map(this.productRepository.findById(id).get(), ProductDto.class);
+        }
+        return null;
     }
 }

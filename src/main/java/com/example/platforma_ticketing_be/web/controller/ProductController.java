@@ -1,8 +1,6 @@
 package com.example.platforma_ticketing_be.web.controller;
 
-import com.example.platforma_ticketing_be.dtos.ProductDto;
-import com.example.platforma_ticketing_be.dtos.ProductFilterDto;
-import com.example.platforma_ticketing_be.dtos.SearchedProductDto;
+import com.example.platforma_ticketing_be.dtos.*;
 import com.example.platforma_ticketing_be.service.ProductService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -21,14 +19,26 @@ public class ProductController {
         this.productService = productService;
     }
 
+    @GetMapping("/{id}")
+    public ProductDto getProductById(@PathVariable("id") Long id){
+        return this.productService.getProductById(id);
+    }
+
     @PostMapping()
     public List<ProductDto> getAllProducts(@RequestBody ProductFilterDto productFilterDto){
         return this.productService.getAllProducts(productFilterDto);
     }
 
-    @PostMapping("/category")
-    public List<ProductDto> getAllProductsByCategory(@RequestBody SearchedProductDto searchedProductDto){
-        return this.productService.getAllProductsByCategory(searchedProductDto.getCategory(), searchedProductDto.getProductFilter());
+    @PostMapping("/theatre")
+    public List<ProductDto> getAllProductsByTheatreId(@RequestBody SearchedTheatreDto searchedTheatreDto){
+        return this.productService.getAllProductsByTheatreId(
+                searchedTheatreDto.getTheatreId(), searchedTheatreDto.getProductFilter());
+    }
+
+    @PostMapping("/category-and-theatre")
+    public List<ProductDto> getAllProductsByCategoryAndTheatreId(@RequestBody SearchedProductTheatreDto searchedProductTheatreDto){
+        return this.productService.getAllProductsByCategoryAndTheatreId(searchedProductTheatreDto.getCategory(),
+                searchedProductTheatreDto.getTheatreId(), searchedProductTheatreDto.getProductFilter());
     }
 
     @PutMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})

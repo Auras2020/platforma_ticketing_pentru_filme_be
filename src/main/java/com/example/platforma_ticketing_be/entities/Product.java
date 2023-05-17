@@ -39,4 +39,8 @@ public class Product {
 
     @Column(name = "number", nullable = false)
     private int number;
+
+    @ManyToOne
+    @JoinColumn(name="theatre_id", nullable=false)
+    private Theatre theatre;
 }

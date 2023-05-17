@@ -1,21 +1,15 @@
 package com.example.platforma_ticketing_be.service.email;
 
-import org.flywaydb.core.internal.resource.filesystem.FileSystemResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import javax.activation.DataSource;
-import javax.activation.FileDataSource;
-import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -43,11 +37,6 @@ public class EmailServiceImpl implements EmailService{
         mailSender.send(message);
     }
 
-   /* @PostConstruct
-    public void sim(){
-        sendEmailWithAttachment("hello", "tickets", "andreipop767@gmail.com", "C:/Users/Ovreiu.Au.Auras/Desktop/Lab_09-13.pdf");
-    }*/
-
     @Override
     public void processEmailWithAttachments(String body, String subject, String mailTo, List<DataSource> attachments) {
         try {
@@ -59,9 +48,10 @@ public class EmailServiceImpl implements EmailService{
             helper.setSubject(subject);
             helper.setText(body);
 
-            //for(int i = 0; i < attachments.size(); i++){
-                helper.addAttachment("Tickets.pdf", attachments.get(0));
-            //}
+            helper.addAttachment("Tickets.pdf", attachments.get(0));
+            if(attachments.size() > 1){
+                helper.addAttachment("Products.pdf", attachments.get(1));
+            }
 
             mailSender.send(message);
 

@@ -10,9 +10,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class SeatDto {
+public class BookedProductsDto {
     private ShowTimingDto showTiming;
-    private List<String> seats;
-    private List<ProductDetailsDto> productDetails;
     private UserAccount user;
+    private List<ProductDetailsDto> productDetails;
 }

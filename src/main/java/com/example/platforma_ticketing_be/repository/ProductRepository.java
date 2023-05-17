@@ -11,7 +11,11 @@ import java.util.Set;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
+    @Query("select p from Product p where p.theatre.id = ?1")
+    Set<Product> getAllProductsByTheatreId(Long theatreId);
 
-    @Query("select p from Product p where p.category = ?1")
-    Set<Product> getAllProductsByCategory(String category);
+    @Query("select p from Product p where p.category = ?1 and p.theatre.id = ?2")
+    Set<Product> getAllProductsByCategoryAndTheatreId(String category, Long theatreId);
+
+
 }

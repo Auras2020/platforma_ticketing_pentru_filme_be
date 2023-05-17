@@ -7,14 +7,10 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class ProductDto {
+public class ProductDetailsDto {
     private Long id;
     private String name;
-    private byte[] image;
-    private String imageName;
-    private String category;
     private int price;
     private int quantity;
     private int number;
-    private TheatreDto theatre;
 }
