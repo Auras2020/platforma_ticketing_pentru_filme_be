@@ -3,16 +3,13 @@ package com.example.platforma_ticketing_be.dtos;
 import com.example.platforma_ticketing_be.entities.UserAccount;
 import lombok.*;
 
-import java.util.List;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class BookedProductsDto {
-    private ShowTimingDto showTiming;
+public class BookedProductPDto {
     private UserAccount user;
-    private int count;
-    private String status;
+    private int page;
+    private int size;
 }

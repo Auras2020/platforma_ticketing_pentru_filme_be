@@ -19,13 +19,12 @@ public class ProductSpecificationImpl {
         return (root, query, builder) -> {
             List<Predicate> searchPredicatesList = new ArrayList<>();
 
-            if ((dto.getSearchString() != null)/* && !(dto.getSearchString().isEmpty())*/) {
+            if (dto.getSearchString() != null) {
                 searchPredicatesList.add(
                         builder.like(builder.lower(root.get("name")), dto.getSearchString().toLowerCase() + "%"));
             }
 
-            Predicate searchPredicate =  builder.or(searchPredicatesList.toArray(new Predicate[0]));
-            return searchPredicate;
+            return builder.or(searchPredicatesList.toArray(new Predicate[0]));
         };
     }
 }

@@ -262,14 +262,14 @@ public class SeatService {
         return file;
     }
 
-    public void create(ShowTimingDto showTimingDto, List<String> seats, List<ProductDetailsDto> productDetails, UserAccount user) throws DocumentException, IOException{
+    public void create(ShowTimingDto showTimingDto, List<String> seats, List<ProductDetailsDto> productDetails, UserAccount user, String status) throws DocumentException, IOException{
         ShowTiming showTiming = this.modelMapper.map(showTimingDto, ShowTiming.class);
         for(String seat: seats){
-            Seat seat1 = new Seat(showTiming, seat, user);
+            Seat seat1 = new Seat(showTiming, seat, user, status);
             seatRepository.save(seat1);
         }
         for(ProductDetailsDto productDetailsDto: productDetails){
-            BookedProduct bookedProduct = new BookedProduct(showTiming, user, productDetailsDto.getName(), productDetailsDto.getQuantity(), productDetailsDto.getNumber());
+            BookedProduct bookedProduct = new BookedProduct(showTiming, user, productDetailsDto.getName(), productDetailsDto.getQuantity(), productDetailsDto.getNumber(), status);
             bookedProductRepository.save(bookedProduct);
         }
 

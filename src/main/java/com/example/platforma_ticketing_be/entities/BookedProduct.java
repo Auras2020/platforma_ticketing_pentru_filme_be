@@ -36,12 +36,13 @@ public class BookedProduct {
     @Column(name = "status", nullable = false)
     private String status; //[bought, reserved, cancelled]
 
-    public BookedProduct(ShowTiming showTiming, UserAccount user, String name, int quantity, int number) {
+    public BookedProduct(ShowTiming showTiming, UserAccount user, String name, int quantity, int number, String status) {
         this.showTiming = showTiming;
         this.user = user;
         this.name = name;
         this.quantity = quantity;
         this.number = number;
+        this.status = status;
     }
 
     public BookedProduct() {

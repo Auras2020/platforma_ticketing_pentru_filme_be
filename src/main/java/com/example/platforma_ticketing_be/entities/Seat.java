@@ -28,10 +28,11 @@ public class Seat {
     @Column(name = "status", nullable = false)
     private String status; //[bought, reserved, cancelled]
 
-    public Seat(ShowTiming showTiming, String seat, UserAccount user) {
+    public Seat(ShowTiming showTiming, String seat, UserAccount user, String status) {
         this.showTiming = showTiming;
         this.seat = seat;
         this.user = user;
+        this.status = status;
     }
 
     public Seat() {

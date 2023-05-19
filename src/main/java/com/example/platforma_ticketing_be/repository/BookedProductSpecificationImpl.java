@@ -1,7 +1,6 @@
 package com.example.platforma_ticketing_be.repository;
 
 import com.example.platforma_ticketing_be.dtos.BookedProductFilterDto;
-import com.example.platforma_ticketing_be.dtos.MovieFilterDto;
 import com.example.platforma_ticketing_be.entities.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
@@ -27,10 +26,13 @@ public class BookedProductSpecificationImpl {
                 predicates.add(builder.like(builder.lower(showTimingTheatreJoin.get("location")), dto.getTheatreLocation().toLowerCase() + "%"));
             }
             if (dto.getTheatreName() != null && !dto.getTheatreName().isEmpty()) {
-                predicates.add(builder.like(builder.lower(root.get("name")), dto.getTheatreName().toLowerCase() + "%"));
+                predicates.add(builder.like(builder.lower(showTimingTheatreJoin.get("name")), dto.getTheatreName().toLowerCase() + "%"));
             }
             if (dto.getMovieName() != null && !dto.getMovieName().isEmpty()) {
                 predicates.add(builder.like(builder.lower(showTimingMovieJoin.get("name")), dto.getMovieName().toLowerCase() + "%"));
+            }
+            if(dto.getDay() != null){
+                predicates.add(builder.equal(bookedproductShowTimingJoin.get("day"), dto.getDay()));
             }
             if (dto.getName() != null && !dto.getName().isEmpty()) {
                 predicates.add(builder.like(builder.lower(root.get("name")), dto.getName().toLowerCase() + "%"));
@@ -41,15 +43,16 @@ public class BookedProductSpecificationImpl {
 
             if ((dto.getSearchString() != null) && !(dto.getSearchString().isEmpty())) {
                 searchPredicatesList.add(
+                        builder.like(builder.lower(showTimingTheatreJoin.get("location")), dto.getSearchString().toLowerCase() + "%"));
+                searchPredicatesList.add(
+                        builder.like(builder.lower(showTimingTheatreJoin.get("name")), dto.getSearchString().toLowerCase() + "%"));
+                searchPredicatesList.add(
+                        builder.like(builder.lower(showTimingMovieJoin.get("name")), dto.getSearchString().toLowerCase() + "%"));
+
+                searchPredicatesList.add(
                         builder.like(builder.lower(root.get("name")), dto.getSearchString().toLowerCase() + "%"));
                 searchPredicatesList.add(
-                        builder.like(builder.lower(root.get("genre")), dto.getSearchString().toLowerCase() + "%"));
-                searchPredicatesList.add(
-                        builder.like(builder.lower(root.get("actors")), dto.getSearchString().toLowerCase() + "%"));
-                searchPredicatesList.add(
-                        builder.like(builder.lower(root.get("director")), dto.getSearchString().toLowerCase() + "%"));
-                searchPredicatesList.add(
-                        builder.like(builder.lower(root.get("synopsis")), dto.getSearchString().toLowerCase() + "%"));
+                        builder.like(builder.lower(root.get("status")), dto.getSearchString().toLowerCase() + "%"));
             }
 
             Predicate searchPredicate = builder.or(searchPredicatesList.toArray(new Predicate[0]));

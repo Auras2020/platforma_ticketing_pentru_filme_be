@@ -42,7 +42,6 @@ public class ShowTimingSpecificationImpl {
             }
 
             if ((dto.getSearchString() != null) && !(dto.getSearchString().isEmpty())) {
-                //Join<ShowTiming, Theatre> showTimingTheatreJoin = root.join("theatre", JoinType.INNER);
                 searchPredicatesList.add(
                         builder.like(builder.lower(showTimingTheatreJoin.get("location")), dto.getSearchString().toLowerCase() + "%"));
                 searchPredicatesList.add(
