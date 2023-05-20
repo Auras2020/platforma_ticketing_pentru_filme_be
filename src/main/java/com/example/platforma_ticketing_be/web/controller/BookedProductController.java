@@ -25,4 +25,10 @@ public class BookedProductController {
             @RequestBody BookedProductPDto dto) {
         return this.bookedProductService.getAllBookedProductsByPaging(dto);
     }
+
+    @PostMapping("/status")
+    public void getAllBookedProductsPage(
+            @RequestBody BookedProductsDto dto) {
+        this.bookedProductService.changeBookedProductsStatus(dto);
+    }
 }

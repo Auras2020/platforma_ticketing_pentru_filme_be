@@ -3,6 +3,8 @@ package com.example.platforma_ticketing_be.service;
 import com.example.platforma_ticketing_be.dtos.*;
 import com.example.platforma_ticketing_be.entities.BookedProduct;
 import com.example.platforma_ticketing_be.entities.ShowTiming;
+import com.example.platforma_ticketing_be.entities.UserAccount;
+import com.example.platforma_ticketing_be.entities.UserRole;
 import com.example.platforma_ticketing_be.repository.BookedProductRepository;
 import com.example.platforma_ticketing_be.repository.BookedProductSpecificationImpl;
 import org.modelmapper.ModelMapper;
@@ -93,6 +95,14 @@ public class BookedProductService {
             totalBookedProducts = this.bookedProductRepository.findFilteredBookProductsOfAUser(PageRequest.of(0, this.bookedProductRepository.findAll().size()), dto.getUser().getId(), filteredBookedProducts1).size();
         }
         return new BookedProductPageResponseDto(filteredBookedProducts, totalBookedProducts);
+    }
+
+    public void changeBookedProductsStatus(BookedProductsDto bookedProductsDto){
+        List<BookedProduct> bookedProducts = this.bookedProductRepository.findBookedProductByUserIdAndShowTimingId(bookedProductsDto.getUser().getId(), bookedProductsDto.getShowTiming().getId());
+        for(BookedProduct bookedProduct: bookedProducts){
+            bookedProduct.setStatus(bookedProductsDto.getStatus());
+            bookedProductRepository.save(bookedProduct);
+        }
     }
 
 }

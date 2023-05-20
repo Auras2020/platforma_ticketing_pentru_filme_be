@@ -34,5 +34,5 @@ public interface BookedProductRepository extends JpaRepository<BookedProduct, Lo
             "ORDER BY st.day desc, st.time desc")
     List<Object[]> findFilteredBookProductsOfAUser(Pageable pageable, Long id, Set<Long> ids);
 
-    List<BookedProduct> findBookedProductByShowTimingId(Long showTimingId);
+    List<BookedProduct> findBookedProductByUserIdAndShowTimingId(Long userId, Long showTimingId);
 }

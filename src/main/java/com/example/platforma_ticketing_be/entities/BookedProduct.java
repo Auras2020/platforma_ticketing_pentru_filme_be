@@ -34,7 +34,7 @@ public class BookedProduct {
     private int number;
 
     @Column(name = "status", nullable = false)
-    private String status; //[bought, reserved, cancelled]
+    private String status;
 
     public BookedProduct(ShowTiming showTiming, UserAccount user, String name, int quantity, int number, String status) {
         this.showTiming = showTiming;

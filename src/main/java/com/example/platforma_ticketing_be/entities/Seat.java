@@ -26,7 +26,7 @@ public class Seat {
     private String seat;
 
     @Column(name = "status", nullable = false)
-    private String status; //[bought, reserved, cancelled]
+    private String status;
 
     public Seat(ShowTiming showTiming, String seat, UserAccount user, String status) {
         this.showTiming = showTiming;

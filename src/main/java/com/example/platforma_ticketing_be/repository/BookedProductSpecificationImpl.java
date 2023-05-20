@@ -38,7 +38,7 @@ public class BookedProductSpecificationImpl {
                 predicates.add(builder.like(builder.lower(root.get("name")), dto.getName().toLowerCase() + "%"));
             }
             if (dto.getStatus() != null && !dto.getStatus().isEmpty()) {
-                predicates.add(builder.like(builder.lower(root.get("status")), dto.getStatus().toLowerCase() + "%"));
+                predicates.add(builder.equal((root.get("status")), dto.getStatus()));
             }
 
             if ((dto.getSearchString() != null) && !(dto.getSearchString().isEmpty())) {
