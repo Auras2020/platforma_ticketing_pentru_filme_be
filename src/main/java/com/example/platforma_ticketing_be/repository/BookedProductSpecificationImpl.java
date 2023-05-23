@@ -1,3 +1,4 @@
+/*
 package com.example.platforma_ticketing_be.repository;
 
 import com.example.platforma_ticketing_be.dtos.BookedProductFilterDto;
@@ -19,6 +20,7 @@ public class BookedProductSpecificationImpl {
             List<Predicate> predicates = new ArrayList<>();
             List<Predicate> searchPredicatesList = new ArrayList<>();
 
+            Join<BookedProduct, Product> bookedproductProductJoin = root.join("product", JoinType.INNER);
             Join<BookedProduct, ShowTiming> bookedproductShowTimingJoin = root.join("showTiming", JoinType.INNER);
             Join<ShowTiming, Theatre> showTimingTheatreJoin = bookedproductShowTimingJoin.join("theatre", JoinType.INNER);
             Join<ShowTiming, Movie> showTimingMovieJoin = bookedproductShowTimingJoin.join("movie", JoinType.INNER);
@@ -35,7 +37,7 @@ public class BookedProductSpecificationImpl {
                 predicates.add(builder.equal(bookedproductShowTimingJoin.get("day"), dto.getDay()));
             }
             if (dto.getName() != null && !dto.getName().isEmpty()) {
-                predicates.add(builder.like(builder.lower(root.get("name")), dto.getName().toLowerCase() + "%"));
+                predicates.add(builder.like(builder.lower(bookedproductProductJoin.get("name")), dto.getName().toLowerCase() + "%"));
             }
             if (dto.getStatus() != null && !dto.getStatus().isEmpty()) {
                 predicates.add(builder.equal((root.get("status")), dto.getStatus()));
@@ -50,7 +52,7 @@ public class BookedProductSpecificationImpl {
                         builder.like(builder.lower(showTimingMovieJoin.get("name")), dto.getSearchString().toLowerCase() + "%"));
 
                 searchPredicatesList.add(
-                        builder.like(builder.lower(root.get("name")), dto.getSearchString().toLowerCase() + "%"));
+                        builder.like(builder.lower(bookedproductProductJoin.get("name")), dto.getSearchString().toLowerCase() + "%"));
                 searchPredicatesList.add(
                         builder.like(builder.lower(root.get("status")), dto.getSearchString().toLowerCase() + "%"));
             }
@@ -65,3 +67,4 @@ public class BookedProductSpecificationImpl {
         };
     }
 }
+*/

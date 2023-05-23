@@ -1,4 +1,3 @@
-/*
 package com.example.platforma_ticketing_be.dtos;
 
 import com.example.platforma_ticketing_be.entities.UserAccount;
@@ -11,10 +10,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class BookedProductsDto {
+public class TicketsProductsDto {
     private ShowTimingDto showTiming;
+    private List<String> seats;
+    private List<ProductDetailsDto> productDetails;
     private UserAccount user;
-    private int count;
-    private String status;
+    private String ticketStatus;
+    private String productStatus;
 }
-*/

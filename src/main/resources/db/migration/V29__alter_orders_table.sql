@@ -1,0 +1,4 @@
+ALTER TABLE orders
+    ALTER COLUMN seat DROP NOT NULL;
+ALTER TABLE orders
+    ALTER COLUMN ticket_status DROP NOT NULL;

@@ -1,4 +1,3 @@
-/*
 package com.example.platforma_ticketing_be.dtos;
 
 import com.example.platforma_ticketing_be.entities.UserAccount;
@@ -9,10 +8,9 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class BookedProductPageDto {
+public class OrderPageDTO {
     private UserAccount user;
-    private BookedProductFilterDto dto;
+    private OrderFilterDto dto;
     private int page;
     private int size;
 }
-*/

@@ -1,7 +1,6 @@
+/*
 package com.example.platforma_ticketing_be.repository;
 
-import com.example.platforma_ticketing_be.entities.BookedProduct;
-import com.example.platforma_ticketing_be.entities.Movie;
 import com.example.platforma_ticketing_be.entities.Seat;
 import com.example.platforma_ticketing_be.entities.UserAccount;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,3 +20,4 @@ public interface SeatRepository extends JpaRepository<Seat, Long>, JpaSpecificat
     @Query("select s from Seat s where s.user = ?1 order by s.showTiming.day, s.showTiming.time desc")
     List<Seat> findSeatByUserIdOrderedByDayAndTimeDesc(UserAccount userAccount);
 }
+*/

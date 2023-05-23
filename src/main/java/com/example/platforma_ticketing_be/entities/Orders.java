@@ -1,7 +1,7 @@
-/*
 package com.example.platforma_ticketing_be.entities;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -11,7 +11,8 @@ import javax.persistence.*;
 @Getter
 @Setter
 @ToString
-public class BookedProduct {
+@NoArgsConstructor
+public class Orders {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -25,26 +26,29 @@ public class BookedProduct {
     @JoinColumn(name="user_id", nullable=false)
     private UserAccount user;
 
+    @Column(name = "seat")
+    private String seat;
+
+    @Column(name = "ticket_status")
+    private String ticketStatus;
+
     @ManyToOne
-    @JoinColumn(name="product_id", nullable=false)
+    @JoinColumn(name="product_id")
     private Product product;
 
-    @Column(name = "number_products", nullable = false)
+    @Column(name = "number_products")
     private int numberProducts;
 
-    @Column(name = "status", nullable = false)
-    private String status;
+    @Column(name = "products_status")
+    private String productsStatus;
 
-    public BookedProduct(ShowTiming showTiming, UserAccount user, Product product, int number, String status) {
+    public Orders(ShowTiming showTiming, UserAccount user, String seat, String ticketStatus, Product product, int numberProducts, String productsStatus) {
         this.showTiming = showTiming;
         this.user = user;
+        this.seat = seat;
+        this.ticketStatus = ticketStatus;
         this.product = product;
-        this.number = number;
-        this.status = status;
-    }
-
-    public BookedProduct() {
-
+        this.numberProducts = numberProducts;
+        this.productsStatus = productsStatus;
     }
 }
-*/

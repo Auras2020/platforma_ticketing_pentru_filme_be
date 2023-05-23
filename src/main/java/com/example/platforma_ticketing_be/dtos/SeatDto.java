@@ -1,3 +1,4 @@
+/*
 package com.example.platforma_ticketing_be.dtos;
 
 import com.example.platforma_ticketing_be.entities.UserAccount;
@@ -17,3 +18,4 @@ public class SeatDto {
     private UserAccount user;
     private String status;
 }
+*/

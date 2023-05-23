@@ -1,4 +1,3 @@
-/*
 package com.example.platforma_ticketing_be.dtos;
 
 import lombok.*;
@@ -10,12 +9,13 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class SeatFilterDto {
+public class OrderFilterDto {
     private String theatreLocation;
     private String theatreName;
     private String movieName;
     private Date day;
-    private String status;
+    private String productName;
+    private String ticketStatus;
+    private String productStatus;
     private String searchString;
 }
-*/

@@ -1,3 +1,4 @@
+/*
 package com.example.platforma_ticketing_be.entities;
 
 import lombok.*;
@@ -39,3 +40,4 @@ public class Seat {
 
     }
 }
+*/

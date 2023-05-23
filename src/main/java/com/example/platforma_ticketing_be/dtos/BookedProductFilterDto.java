@@ -1,3 +1,4 @@
+/*
 package com.example.platforma_ticketing_be.dtos;
 
 import lombok.*;
@@ -18,3 +19,4 @@ public class BookedProductFilterDto {
     private String status;
     private String searchString;
 }
+*/

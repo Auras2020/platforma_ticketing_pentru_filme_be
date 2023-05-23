@@ -1,7 +1,5 @@
-/*
 package com.example.platforma_ticketing_be.dtos;
 
-import com.example.platforma_ticketing_be.entities.BookedProduct;
 import lombok.*;
 
 import java.util.List;
@@ -11,8 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class BookedProductPageResponseDto {
-    private List<BookedProductsDto> bookedProducts;
+public class OrderPageResponseDto {
+    private List<OrdersDto> orders;
     private int totalItems;
 }
-*/

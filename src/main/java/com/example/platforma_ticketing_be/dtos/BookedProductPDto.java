@@ -1,3 +1,4 @@
+/*
 package com.example.platforma_ticketing_be.dtos;
 
 import com.example.platforma_ticketing_be.entities.UserAccount;
@@ -13,3 +14,4 @@ public class BookedProductPDto {
     private int page;
     private int size;
 }
+*/

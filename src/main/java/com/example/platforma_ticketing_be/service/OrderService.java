@@ -1,54 +1,57 @@
-/*
 package com.example.platforma_ticketing_be.service;
 
-import com.example.platforma_ticketing_be.dtos.ProductDetailsDto;
-import com.example.platforma_ticketing_be.dtos.ShowTimingDto;
+import com.example.platforma_ticketing_be.dtos.*;
 import com.example.platforma_ticketing_be.entities.*;
-import com.example.platforma_ticketing_be.repository.BookedProductRepository;
-import com.example.platforma_ticketing_be.repository.ProductRepository;
-import com.example.platforma_ticketing_be.repository.SeatRepository;
+import com.example.platforma_ticketing_be.repository.*;
 import com.example.platforma_ticketing_be.service.email.EmailServiceImpl;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.*;
 import com.lowagie.text.Font;
-import com.lowagie.text.Image;
 import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfWriter;
 import org.modelmapper.ModelMapper;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import javax.activation.DataSource;
 import javax.mail.util.ByteArrayDataSource;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.*;
 import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 @Service
-public class SeatService {
+public class OrderService {
 
-    private final SeatRepository seatRepository;
-    private final BookedProductRepository bookedProductRepository;
+    private final OrderRepository orderRepository;
+    private final OrderSpecificationImpl orderSpecification;
     private final ModelMapper modelMapper;
-    private final ProductRepository productRepository;
     private final EmailServiceImpl emailService;
+    private final ProductRepository productRepository;
+    private final ShowTimingRepository showTimingRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
     private String[] daysOfWeek = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
-    public SeatService(SeatRepository seatRepository, BookedProductRepository bookedProductRepository, ModelMapper modelMapper, ProductRepository productRepository, EmailServiceImpl emailService) {
-        this.seatRepository = seatRepository;
-        this.bookedProductRepository = bookedProductRepository;
+    public OrderService(OrderRepository orderRepository, OrderSpecificationImpl orderSpecification, ModelMapper modelMapper, EmailServiceImpl emailService, ProductRepository productRepository, ShowTimingRepository showTimingRepository) {
+        this.orderRepository = orderRepository;
+        this.orderSpecification = orderSpecification;
         this.modelMapper = modelMapper;
-        this.productRepository = productRepository;
         this.emailService = emailService;
+        this.productRepository = productRepository;
+        this.showTimingRepository = showTimingRepository;
     }
 
     private void displayParagraph(String message, Document document, Font fontUser, float indentation){
@@ -84,7 +87,7 @@ public class SeatService {
     }
 
     private void displayImage(PdfWriter writer, Document document) throws IOException {
-        Image image = Image.getInstance("classpath:qr.png");
+        com.lowagie.text.Image image = com.lowagie.text.Image.getInstance("classpath:qr.png");
         float x = 600;
         float y = lastParagrapghYCoordinate(writer);
         image.scaleAbsolute(200, 200);
@@ -264,16 +267,34 @@ public class SeatService {
         return file;
     }
 
-    public void create(ShowTimingDto showTimingDto, List<String> seats, List<ProductDetailsDto> productDetails, UserAccount user, String status) throws DocumentException, IOException{
+    public void createOrder(ShowTimingDto showTimingDto, List<String> seats, List<ProductDetailsDto> productDetails, UserAccount user, String ticketStatus, String productStatus) throws DocumentException, IOException{
         ShowTiming showTiming = this.modelMapper.map(showTimingDto, ShowTiming.class);
-        for(String seat: seats){
-            Seat seat1 = new Seat(showTiming, seat, user, status);
-            seatRepository.save(seat1);
-        }
-        for(ProductDetailsDto productDetailsDto: productDetails){
-            Optional<Product> product = this.productRepository.findById(productDetailsDto.getId());
-            BookedProduct bookedProduct = new BookedProduct(showTiming, user, product.get(), productDetailsDto.getNumber(), status);
-            bookedProductRepository.save(bookedProduct);
+        if(productDetails.size() == 0){
+            for (String seat : seats) {
+                Orders order = new Orders(showTiming, user, seat, ticketStatus, null, 0, null);
+                this.orderRepository.save(order);
+            }
+        } else if(seats.size() >= productDetails.size()){
+            for(int i = 0; i < productDetails.size(); i++){
+                Optional<Product> product = this.productRepository.findById(productDetails.get(i).getId());
+                Orders order = new Orders(showTiming, user, seats.get(i), ticketStatus, product.get(), productDetails.get(i).getNumber(), productStatus);
+                this.orderRepository.save(order);
+            }
+            for(int i = productDetails.size(); i < seats.size(); i++){
+                Orders order = new Orders(showTiming, user, seats.get(i), ticketStatus, null, 0, productStatus);
+                this.orderRepository.save(order);
+            }
+        } else {
+            for(int i = 0; i < seats.size(); i++){
+                Optional<Product> product = this.productRepository.findById(productDetails.get(i).getId());
+                Orders order = new Orders(showTiming, user, seats.get(i), ticketStatus, product.get(), productDetails.get(i).getNumber(), productStatus);
+                this.orderRepository.save(order);
+            }
+            for(int i = seats.size(); i < productDetails.size(); i++){
+                Optional<Product> product = this.productRepository.findById(productDetails.get(i).getId());
+                Orders order = new Orders(showTiming, user, null, ticketStatus, product.get(), productDetails.get(i).getNumber(), productStatus);
+                this.orderRepository.save(order);
+            }
         }
 
         List<DataSource> dataSourceList = new ArrayList<>();
@@ -302,7 +323,132 @@ public class SeatService {
     }
 
     public Set<String> findSeatsByShowTimingId(Long id){
-        return this.seatRepository.findSeatsByShowTimingId(id);
+        return this.orderRepository.findSeatsByShowTimingId(id);
+    }
+
+    public Set<Long> filterOrders(List<Orders> orders, OrderPageDTO dto) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Orders> query = builder.createQuery(Orders.class);
+        Root<Orders> root = query.from(Orders.class);
+        Specification<Orders> specification = this.orderSpecification.getOrders(dto.getDto());
+
+        Predicate predicate = specification.toPredicate(root, query, builder);
+        query.where(predicate);
+
+        Set<Long> filteredOrders = new HashSet<>();
+        for (Orders order : orders) {
+            Predicate orderPredicate = builder.and(predicate, builder.equal(root, order));
+            query.where(orderPredicate);
+            List<Orders> result = entityManager.createQuery(query).getResultList();
+            if (!result.isEmpty()) {
+                filteredOrders.add(order.getShowTiming().getId());
+            }
+        }
+
+        return filteredOrders;
+    }
+
+    public OrderPageResponseDto getAllOrdersByPaging(OrderPDto dto) {
+        List<Object[]> objects = this.orderRepository
+                .findOrdersOfAUser(
+                        PageRequest.of(dto.getPage(), dto.getSize()),
+                        dto.getUser().getId());
+        List<OrdersDto> ordersDtos = new ArrayList<>();
+        for(Object[] object: objects){
+            ShowTiming showTiming =  (ShowTiming) object[0];
+            long nrTickets = (long) object[1];
+            String ticketsStatus = (String) object[2];
+            long nrProducts = (long) object[3];
+            String productsStatus = (String) object[4];
+            ordersDtos.add(new OrdersDto(this.modelMapper.map(showTiming, ShowTimingDto.class), dto.getUser(), (int) nrTickets, ticketsStatus, (int) nrProducts, productsStatus));
+        }
+        int totalOrders = 0;
+        if(this.orderRepository.findAll().size() > 0){
+            totalOrders = this.orderRepository.findOrdersOfAUser(PageRequest.of(0, this.orderRepository.findAll().size()), dto.getUser().getId()).size();
+        }
+        return new OrderPageResponseDto(ordersDtos, totalOrders);
+    }
+
+    public OrderPageResponseDto getAllOrdersByPagingAndFilter(OrderPageDTO dto) {
+        Set<Long> filteredOrders1 = filterOrders(this.orderRepository.findAll(), dto);
+        int totalOrders = 0;
+        List<OrdersDto> filteredOrders = new ArrayList<>();
+        if(this.orderRepository.findAll().size() > 0){
+            List<Object[]> objects = this.orderRepository
+                    .findFilteredOrdersOfAUser(
+                            PageRequest.of(dto.getPage(), dto.getSize()),
+                            dto.getUser().getId(), filteredOrders1);
+            for(Object[] object: objects){
+                ShowTiming showTiming =  (ShowTiming) object[0];
+                long nrTickets = (long) object[1];
+                String ticketsStatus = (String) object[2];
+                long nrProducts = (long) object[3];
+                String productsStatus = (String) object[4];
+                filteredOrders.add(new OrdersDto(this.modelMapper.map(showTiming, ShowTimingDto.class), dto.getUser(), (int) nrTickets, ticketsStatus, (int) nrProducts, productsStatus));
+            }
+            totalOrders = this.orderRepository.findFilteredOrdersOfAUser(PageRequest.of(0, this.orderRepository.findAll().size()), dto.getUser().getId(), filteredOrders1).size();
+        }
+        return new OrderPageResponseDto(filteredOrders, totalOrders);
+    }
+
+    public void changeOrdersStatus(OrdersDto ordersDto){
+        List<Orders> orders = this.orderRepository.findOrdersByUserIdAndShowTimingId(ordersDto.getUser().getId(), ordersDto.getShowTiming().getId());
+        for(Orders order: orders){
+            order.setTicketStatus(ordersDto.getTicketsStatus());
+            order.setProductsStatus(ordersDto.getProductsStatus());
+            orderRepository.save(order);
+        }
+        if(ordersDto.getTicketsStatus().equals("cancelled")){
+            refreshAvailableSeatsInAVenue(ordersDto);
+        }
+        if(ordersDto.getProductsStatus().equals("cancelled")){
+            refreshNumberOfAvailableProductsInTheatre(ordersDto);
+        }
+        sendEmailWithBookedproductsStatus(ordersDto);
+    }
+
+    public List<ProductDetailsDto> getBookedProductsDetails(OrdersDto ordersDto){
+        List<Orders> orders = this.orderRepository.findOrdersByUserIdAndShowTimingId(ordersDto.getUser().getId(), ordersDto.getShowTiming().getId());
+        List<ProductDetailsDto> productDetailsDtos = new ArrayList<>();
+        for(Orders order: orders){
+            if(order.getProduct() != null){
+                productDetailsDtos.add(new ProductDetailsDto(order.getProduct().getName(), order.getProduct().getPrice(),
+                        order.getProduct().getQuantity(), order.getNumberProducts()));
+            }
+        }
+        return productDetailsDtos;
+    }
+
+    private String changeDateFormat(Date date){
+        String pattern = "dd/MM/yyyy";
+        SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+        return sdf.format(date);
+    }
+
+    private void sendEmailWithBookedproductsStatus(OrdersDto ordersDto){
+        String subject = "Hot Movies Center - " + ordersDto.getProductsStatus().substring(0, 1).toUpperCase() + ordersDto.getProductsStatus().substring(1) + " Products";
+        String body = "Your products for movie " + ordersDto.getShowTiming().getMovie().getName() +
+                " at theatre " + ordersDto.getShowTiming().getTheatre().getName() + " on date of " +
+                changeDateFormat(ordersDto.getShowTiming().getDay()) + " " +
+                ordersDto.getShowTiming().getTime() + " were " + ordersDto.getProductsStatus();
+        this.emailService.sendEmail(subject, body, ordersDto.getUser().getEmail());
+    }
+
+    private void refreshAvailableSeatsInAVenue(OrdersDto ordersDto){
+        List<Orders> orders = this.orderRepository.findOrdersByUserIdAndShowTimingId(ordersDto.getUser().getId(), ordersDto.getShowTiming().getId());
+        for(Orders order: orders){
+            /*Product product = bookedProduct.getProduct();
+            product.setNumber(product.getNumber() + bookedProduct.getNumber());
+            this.productRepository.save(product);*/
+        }
+    }
+
+    private void refreshNumberOfAvailableProductsInTheatre(OrdersDto ordersDto){
+        List<Orders> orders = this.orderRepository.findOrdersByUserIdAndShowTimingId(ordersDto.getUser().getId(), ordersDto.getShowTiming().getId());
+        for(Orders order: orders){
+            Product product = order.getProduct();
+            product.setNumber(product.getNumber() + order.getNumberProducts());
+            this.productRepository.save(product);
+        }
     }
 }
-*/

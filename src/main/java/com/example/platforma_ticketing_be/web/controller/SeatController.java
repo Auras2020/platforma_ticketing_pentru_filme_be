@@ -1,3 +1,4 @@
+/*
 package com.example.platforma_ticketing_be.web.controller;
 
 import com.example.platforma_ticketing_be.dtos.SeatDto;
@@ -31,3 +32,4 @@ public class SeatController {
         return this.seatService.findSeatsByShowTimingId(id);
     }
 }
+*/
