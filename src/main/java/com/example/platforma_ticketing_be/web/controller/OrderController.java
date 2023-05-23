@@ -32,12 +32,17 @@ public class OrderController {
     }
 
     @PostMapping("/status")
-    public void getAllOrdersPage(
+    public void changeOrdersStatus(
             @RequestBody OrdersDto dto) {
         this.orderService.changeOrdersStatus(dto);
     }
 
-    @PostMapping("/details")
+    @PostMapping("/tickets-details")
+    public List<TicketDetailsDto> getTicketsDetails(@RequestBody OrdersDto ordersDto){
+        return this.orderService.getTicketsDetails(ordersDto);
+    }
+
+    @PostMapping("/products-details")
     public List<ProductDetailsDto> getBookedProductsDetails(@RequestBody OrdersDto ordersDto){
         return this.orderService.getBookedProductsDetails(ordersDto);
     }
@@ -50,7 +55,7 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    public Set<String> findSeatsByShowTiming(@PathVariable("id") Long id){
-        return this.orderService.findSeatsByShowTimingId(id);
+    public SeatTicketStatusDto findSeatsAndTicketsStatusByShowTiming(@PathVariable("id") Long id){
+        return this.orderService.findSeatsAndTicketsStatusByShowTiming(id);
     }
 }

@@ -13,7 +13,7 @@ import java.util.Set;
 @Repository
 public interface OrderRepository extends JpaRepository<Orders, Long>, JpaSpecificationExecutor<Orders> {
 
-    @Query("SELECT st, COUNT(o.showTiming.id), o.ticketStatus, SUM(o.numberProducts), o.productsStatus  " +
+    @Query("SELECT st, COUNT(o.seat), o.ticketStatus, SUM(o.numberProducts), o.productsStatus  " +
             "FROM ShowTiming st " +
             "INNER JOIN Orders o ON o.showTiming.id = st.id " +
             "WHERE o.user.id = :id " +
@@ -21,7 +21,7 @@ public interface OrderRepository extends JpaRepository<Orders, Long>, JpaSpecifi
             "ORDER BY st.day desc, st.time desc")
     List<Object[]> findOrdersOfAUser(Pageable pageable, Long id);
 
-    @Query("SELECT st, COUNT(o.showTiming.id), o.ticketStatus, SUM(o.numberProducts), o.productsStatus  " +
+    @Query("SELECT st, COUNT(o.seat), o.ticketStatus, SUM(o.numberProducts), o.productsStatus  " +
             "FROM ShowTiming st " +
             "INNER JOIN Orders o ON o.showTiming.id = st.id " +
             "WHERE o.user.id = :id and st.id in :ids " +
@@ -33,4 +33,7 @@ public interface OrderRepository extends JpaRepository<Orders, Long>, JpaSpecifi
 
     @Query("select o.seat from Orders o where o.showTiming.id = ?1")
     Set<String> findSeatsByShowTimingId(Long id);
+
+    @Query("select o.ticketStatus from Orders o where o.showTiming.id = ?1")
+    Set<String> findTicketsStatusByShowTimingId(Long id);
 }

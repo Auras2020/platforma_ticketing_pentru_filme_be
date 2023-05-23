@@ -322,8 +322,16 @@ public class OrderService {
         }
     }
 
-    public Set<String> findSeatsByShowTimingId(Long id){
-        return this.orderRepository.findSeatsByShowTimingId(id);
+    public SeatTicketStatusDto findSeatsAndTicketsStatusByShowTiming(Long id){
+        return new SeatTicketStatusDto(findSeatsByShowTiming(id), findTicketsStatusByShowTiming(id));
+    }
+
+    private List<String> findSeatsByShowTiming(Long id){
+        return this.orderRepository.findSeatsByShowTimingId(id).stream().toList();
+    }
+
+    private List<String> findTicketsStatusByShowTiming(Long id){
+        return this.orderRepository.findTicketsStatusByShowTimingId(id).stream().toList();
     }
 
     public Set<Long> filterOrders(List<Orders> orders, OrderPageDTO dto) {
@@ -393,18 +401,34 @@ public class OrderService {
 
     public void changeOrdersStatus(OrdersDto ordersDto){
         List<Orders> orders = this.orderRepository.findOrdersByUserIdAndShowTimingId(ordersDto.getUser().getId(), ordersDto.getShowTiming().getId());
-        for(Orders order: orders){
-            order.setTicketStatus(ordersDto.getTicketsStatus());
-            order.setProductsStatus(ordersDto.getProductsStatus());
-            orderRepository.save(order);
+        if(ordersDto.getTicketsStatus() != null) {
+            for(Orders order: orders) {
+                order.setTicketStatus(ordersDto.getTicketsStatus());
+                orderRepository.save(order);
+            }
         }
-        if(ordersDto.getTicketsStatus().equals("cancelled")){
-            refreshAvailableSeatsInAVenue(ordersDto);
-        }
-        if(ordersDto.getProductsStatus().equals("cancelled")){
-            refreshNumberOfAvailableProductsInTheatre(ordersDto);
+        if(ordersDto.getProductsStatus() != null) {
+            for(Orders order: orders) {
+                order.setProductsStatus(ordersDto.getProductsStatus());
+                orderRepository.save(order);
+            }
+            if(ordersDto.getProductsStatus().equals("cancelled")){
+                refreshNumberOfAvailableProductsInTheatre(ordersDto);
+            }
         }
         sendEmailWithBookedproductsStatus(ordersDto);
+    }
+
+    public List<TicketDetailsDto> getTicketsDetails(OrdersDto ordersDto){
+        List<Orders> orders = this.orderRepository.findOrdersByUserIdAndShowTimingId(ordersDto.getUser().getId(), ordersDto.getShowTiming().getId());
+        List<TicketDetailsDto> ticketDetailsDtos = new ArrayList<>();
+        for(Orders order: orders){
+            if(order.getSeat() != null){
+                ticketDetailsDtos.add(new TicketDetailsDto(order.getShowTiming().getVenue().getVenueNumber(), order.getShowTiming().getPrice(),
+                         order.getSeat()));
+            }
+        }
+        return ticketDetailsDtos;
     }
 
     public List<ProductDetailsDto> getBookedProductsDetails(OrdersDto ordersDto){
@@ -434,21 +458,14 @@ public class OrderService {
         this.emailService.sendEmail(subject, body, ordersDto.getUser().getEmail());
     }
 
-    private void refreshAvailableSeatsInAVenue(OrdersDto ordersDto){
-        List<Orders> orders = this.orderRepository.findOrdersByUserIdAndShowTimingId(ordersDto.getUser().getId(), ordersDto.getShowTiming().getId());
-        for(Orders order: orders){
-            /*Product product = bookedProduct.getProduct();
-            product.setNumber(product.getNumber() + bookedProduct.getNumber());
-            this.productRepository.save(product);*/
-        }
-    }
-
     private void refreshNumberOfAvailableProductsInTheatre(OrdersDto ordersDto){
         List<Orders> orders = this.orderRepository.findOrdersByUserIdAndShowTimingId(ordersDto.getUser().getId(), ordersDto.getShowTiming().getId());
         for(Orders order: orders){
             Product product = order.getProduct();
-            product.setNumber(product.getNumber() + order.getNumberProducts());
-            this.productRepository.save(product);
+            if(order.getProduct() != null){
+                product.setNumber(product.getNumber() + order.getNumberProducts());
+                this.productRepository.save(product);
+            }
         }
     }
 }
