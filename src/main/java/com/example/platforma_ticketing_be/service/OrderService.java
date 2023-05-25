@@ -267,32 +267,40 @@ public class OrderService {
         return file;
     }
 
+    private Date getCurrentDate(){
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.set(Calendar.SECOND, 0);
+
+        return calendar.getTime();
+    }
+
     public void createOrder(ShowTimingDto showTimingDto, List<String> seats, List<ProductDetailsDto> productDetails, UserAccount user, String ticketStatus, String productStatus) throws DocumentException, IOException{
         ShowTiming showTiming = this.modelMapper.map(showTimingDto, ShowTiming.class);
         if(productDetails.size() == 0){
             for (String seat : seats) {
-                Orders order = new Orders(showTiming, user, seat, ticketStatus, null, 0, null);
+                Orders order = new Orders(showTiming, user, seat, ticketStatus, null, 0, null, getCurrentDate());
                 this.orderRepository.save(order);
             }
         } else if(seats.size() >= productDetails.size()){
             for(int i = 0; i < productDetails.size(); i++){
                 Optional<Product> product = this.productRepository.findById(productDetails.get(i).getId());
-                Orders order = new Orders(showTiming, user, seats.get(i), ticketStatus, product.get(), productDetails.get(i).getNumber(), productStatus);
+                Orders order = new Orders(showTiming, user, seats.get(i), ticketStatus, product.get(), productDetails.get(i).getNumber(), productStatus, getCurrentDate());
                 this.orderRepository.save(order);
             }
             for(int i = productDetails.size(); i < seats.size(); i++){
-                Orders order = new Orders(showTiming, user, seats.get(i), ticketStatus, null, 0, productStatus);
+                Orders order = new Orders(showTiming, user, seats.get(i), ticketStatus, null, 0, productStatus, getCurrentDate());
                 this.orderRepository.save(order);
             }
         } else {
             for(int i = 0; i < seats.size(); i++){
                 Optional<Product> product = this.productRepository.findById(productDetails.get(i).getId());
-                Orders order = new Orders(showTiming, user, seats.get(i), ticketStatus, product.get(), productDetails.get(i).getNumber(), productStatus);
+                Orders order = new Orders(showTiming, user, seats.get(i), ticketStatus, product.get(), productDetails.get(i).getNumber(), productStatus, getCurrentDate());
                 this.orderRepository.save(order);
             }
             for(int i = seats.size(); i < productDetails.size(); i++){
                 Optional<Product> product = this.productRepository.findById(productDetails.get(i).getId());
-                Orders order = new Orders(showTiming, user, null, ticketStatus, product.get(), productDetails.get(i).getNumber(), productStatus);
+                Orders order = new Orders(showTiming, user, null, ticketStatus, product.get(), productDetails.get(i).getNumber(), productStatus, getCurrentDate());
                 this.orderRepository.save(order);
             }
         }
@@ -322,16 +330,15 @@ public class OrderService {
         }
     }
 
-    public SeatTicketStatusDto findSeatsAndTicketsStatusByShowTiming(Long id){
-        return new SeatTicketStatusDto(findSeatsByShowTiming(id), findTicketsStatusByShowTiming(id));
-    }
-
-    private List<String> findSeatsByShowTiming(Long id){
-        return this.orderRepository.findSeatsByShowTimingId(id).stream().toList();
-    }
-
-    private List<String> findTicketsStatusByShowTiming(Long id){
-        return this.orderRepository.findTicketsStatusByShowTimingId(id).stream().toList();
+    public List<SeatTicketStatusDto> findSeatsAndTicketsStatusByShowTiming(Long id){
+        List<Object[]> objects = this.orderRepository.findSeatsAndTicketsStatusByShowTimingId(id);
+        List<SeatTicketStatusDto> seatTicketStatusDtos = new ArrayList<>();
+        for(Object[] object: objects){
+            String seat = (String) object[0];
+            String ticketStatus = (String) object[1];
+            seatTicketStatusDtos.add(new SeatTicketStatusDto(seat, ticketStatus));
+        }
+        return seatTicketStatusDtos;
     }
 
     public Set<Long> filterOrders(List<Orders> orders, OrderPageDTO dto) {
@@ -349,7 +356,7 @@ public class OrderService {
             query.where(orderPredicate);
             List<Orders> result = entityManager.createQuery(query).getResultList();
             if (!result.isEmpty()) {
-                filteredOrders.add(order.getShowTiming().getId());
+                filteredOrders.add(order.getId());
             }
         }
 
@@ -368,7 +375,8 @@ public class OrderService {
             String ticketsStatus = (String) object[2];
             long nrProducts = (long) object[3];
             String productsStatus = (String) object[4];
-            ordersDtos.add(new OrdersDto(this.modelMapper.map(showTiming, ShowTimingDto.class), dto.getUser(), (int) nrTickets, ticketsStatus, (int) nrProducts, productsStatus));
+            Date date = (Date) object[5];
+            ordersDtos.add(new OrdersDto(this.modelMapper.map(showTiming, ShowTimingDto.class), dto.getUser(), (int) nrTickets, ticketsStatus, (int) nrProducts, productsStatus, date));
         }
         int totalOrders = 0;
         if(this.orderRepository.findAll().size() > 0){
@@ -392,7 +400,8 @@ public class OrderService {
                 String ticketsStatus = (String) object[2];
                 long nrProducts = (long) object[3];
                 String productsStatus = (String) object[4];
-                filteredOrders.add(new OrdersDto(this.modelMapper.map(showTiming, ShowTimingDto.class), dto.getUser(), (int) nrTickets, ticketsStatus, (int) nrProducts, productsStatus));
+                Date date = (Date) object[5];
+                filteredOrders.add(new OrdersDto(this.modelMapper.map(showTiming, ShowTimingDto.class), dto.getUser(), (int) nrTickets, ticketsStatus, (int) nrProducts, productsStatus, date));
             }
             totalOrders = this.orderRepository.findFilteredOrdersOfAUser(PageRequest.of(0, this.orderRepository.findAll().size()), dto.getUser().getId(), filteredOrders1).size();
         }
@@ -400,27 +409,35 @@ public class OrderService {
     }
 
     public void changeOrdersStatus(OrdersDto ordersDto){
-        List<Orders> orders = this.orderRepository.findOrdersByUserIdAndShowTimingId(ordersDto.getUser().getId(), ordersDto.getShowTiming().getId());
+        List<Orders> orders = this.orderRepository.findOrdersByUserIdAndShowTimingIdAndCreatedDate(
+                ordersDto.getUser().getId(), ordersDto.getShowTiming().getId(), ordersDto.getCreatedDate());
         if(ordersDto.getTicketsStatus() != null) {
             for(Orders order: orders) {
                 order.setTicketStatus(ordersDto.getTicketsStatus());
+                order.setCreatedDate(getCurrentDate());
                 orderRepository.save(order);
             }
+            if(ordersDto.getTicketsStatus().equals("cancelled")){
+                refreshNumberOfAvailableProductsInTheatre(ordersDto);
+            }
+            sendEmailWithTicketsStatus(ordersDto);
         }
         if(ordersDto.getProductsStatus() != null) {
             for(Orders order: orders) {
                 order.setProductsStatus(ordersDto.getProductsStatus());
+                order.setCreatedDate(getCurrentDate());
                 orderRepository.save(order);
             }
             if(ordersDto.getProductsStatus().equals("cancelled")){
                 refreshNumberOfAvailableProductsInTheatre(ordersDto);
             }
+            sendEmailWithBookedproductsStatus(ordersDto);
         }
-        sendEmailWithBookedproductsStatus(ordersDto);
     }
 
     public List<TicketDetailsDto> getTicketsDetails(OrdersDto ordersDto){
-        List<Orders> orders = this.orderRepository.findOrdersByUserIdAndShowTimingId(ordersDto.getUser().getId(), ordersDto.getShowTiming().getId());
+        List<Orders> orders = this.orderRepository.findOrdersByUserIdAndShowTimingIdAndCreatedDate(
+                ordersDto.getUser().getId(), ordersDto.getShowTiming().getId(), ordersDto.getCreatedDate());
         List<TicketDetailsDto> ticketDetailsDtos = new ArrayList<>();
         for(Orders order: orders){
             if(order.getSeat() != null){
@@ -432,10 +449,12 @@ public class OrderService {
     }
 
     public List<ProductDetailsDto> getBookedProductsDetails(OrdersDto ordersDto){
-        List<Orders> orders = this.orderRepository.findOrdersByUserIdAndShowTimingId(ordersDto.getUser().getId(), ordersDto.getShowTiming().getId());
+        List<Orders> orders = this.orderRepository.findOrdersByUserIdAndShowTimingIdAndCreatedDate(
+                ordersDto.getUser().getId(), ordersDto.getShowTiming().getId(), ordersDto.getCreatedDate());
         List<ProductDetailsDto> productDetailsDtos = new ArrayList<>();
         for(Orders order: orders){
             if(order.getProduct() != null){
+                System.out.println(order.getProduct().getName() + " " + order.getCreatedDate());
                 productDetailsDtos.add(new ProductDetailsDto(order.getProduct().getName(), order.getProduct().getPrice(),
                         order.getProduct().getQuantity(), order.getNumberProducts()));
             }
@@ -449,6 +468,15 @@ public class OrderService {
         return sdf.format(date);
     }
 
+    private void sendEmailWithTicketsStatus(OrdersDto ordersDto){
+        String subject = "Hot Movies Center - " + ordersDto.getTicketsStatus().substring(0, 1).toUpperCase() + ordersDto.getTicketsStatus().substring(1) + " Tickets";
+        String body = "Your tickets for movie " + ordersDto.getShowTiming().getMovie().getName() +
+                " at theatre " + ordersDto.getShowTiming().getTheatre().getName() + " on date of " +
+                changeDateFormat(ordersDto.getShowTiming().getDay()) + " " +
+                ordersDto.getShowTiming().getTime() + " were " + ordersDto.getTicketsStatus();
+        this.emailService.sendEmail(subject, body, ordersDto.getUser().getEmail());
+    }
+
     private void sendEmailWithBookedproductsStatus(OrdersDto ordersDto){
         String subject = "Hot Movies Center - " + ordersDto.getProductsStatus().substring(0, 1).toUpperCase() + ordersDto.getProductsStatus().substring(1) + " Products";
         String body = "Your products for movie " + ordersDto.getShowTiming().getMovie().getName() +
@@ -459,7 +487,8 @@ public class OrderService {
     }
 
     private void refreshNumberOfAvailableProductsInTheatre(OrdersDto ordersDto){
-        List<Orders> orders = this.orderRepository.findOrdersByUserIdAndShowTimingId(ordersDto.getUser().getId(), ordersDto.getShowTiming().getId());
+        List<Orders> orders = this.orderRepository.findOrdersByUserIdAndShowTimingIdAndCreatedDate(
+                ordersDto.getUser().getId(), ordersDto.getShowTiming().getId(), ordersDto.getCreatedDate());
         for(Orders order: orders){
             Product product = order.getProduct();
             if(order.getProduct() != null){
@@ -468,4 +497,16 @@ public class OrderService {
             }
         }
     }
+
+    public Date getLastOrderCreatedByUserAndShowTiming(UserShowTimingDto userShowTimingDto){
+        System.out.println(userShowTimingDto);
+        System.out.println(this.orderRepository.getLastOrderCreatedByUserAndShowTiming(userShowTimingDto.getUserId(), userShowTimingDto.getShowTimingId()));
+        return this.orderRepository.getLastOrderCreatedByUserAndShowTiming(userShowTimingDto.getUserId(), userShowTimingDto.getShowTimingId());
+    }
+
+   /* public OrdersDto refreshOrdersStatus(OrdersDto ordersDto){
+        List<Orders> orders = this.orderRepository.refreshOrdersStatus(
+                ordersDto.getUser().getId(), ordersDto.getShowTiming().getId(), ordersDto.getCreatedDate());
+        return new OrdersDto(this.modelMapper.map(showTiming, ShowTimingDto.class), dto.getUser(), (int) nrTickets, ticketsStatus, (int) nrProducts, productsStatus, date);
+    }*/
 }

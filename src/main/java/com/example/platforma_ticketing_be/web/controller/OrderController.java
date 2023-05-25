@@ -6,8 +6,8 @@ import com.lowagie.text.DocumentException;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping(value = "/orders")
@@ -55,7 +55,12 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    public SeatTicketStatusDto findSeatsAndTicketsStatusByShowTiming(@PathVariable("id") Long id){
+    public List<SeatTicketStatusDto> findSeatsAndTicketsStatusByShowTiming(@PathVariable("id") Long id){
         return this.orderService.findSeatsAndTicketsStatusByShowTiming(id);
+    }
+
+    @PostMapping("/last-created-date")
+    public Date getLastOrderCreatedByUserAndShowTiming(@RequestBody UserShowTimingDto userShowTimingDto) {
+        return this.orderService.getLastOrderCreatedByUserAndShowTiming(userShowTimingDto);
     }
 }

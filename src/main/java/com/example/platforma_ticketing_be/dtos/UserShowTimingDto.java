@@ -2,14 +2,12 @@ package com.example.platforma_ticketing_be.dtos;
 
 import lombok.*;
 
-import java.util.List;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class SeatTicketStatusDto {
-    private String seats;
-    private String ticketsStatus;
+public class UserShowTimingDto {
+    private Long userId;
+    private Long showTimingId;
 }

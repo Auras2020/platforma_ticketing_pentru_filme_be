@@ -3,7 +3,7 @@ package com.example.platforma_ticketing_be.dtos;
 import com.example.platforma_ticketing_be.entities.UserAccount;
 import lombok.*;
 
-import java.math.BigInteger;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -17,4 +17,5 @@ public class OrdersDto {
     private String ticketsStatus;
     private int productsCount;
     private String productsStatus;
+    private Date createdDate;
 }

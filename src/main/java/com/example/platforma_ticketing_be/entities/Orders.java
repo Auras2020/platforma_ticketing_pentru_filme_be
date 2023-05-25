@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Getter
@@ -42,7 +43,11 @@ public class Orders {
     @Column(name = "products_status")
     private String productsStatus;
 
-    public Orders(ShowTiming showTiming, UserAccount user, String seat, String ticketStatus, Product product, int numberProducts, String productsStatus) {
+    @Column(name = "created_date", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdDate;
+
+    public Orders(ShowTiming showTiming, UserAccount user, String seat, String ticketStatus, Product product, int numberProducts, String productsStatus, Date createdDate) {
         this.showTiming = showTiming;
         this.user = user;
         this.seat = seat;
@@ -50,5 +55,6 @@ public class Orders {
         this.product = product;
         this.numberProducts = numberProducts;
         this.productsStatus = productsStatus;
+        this.createdDate = createdDate;
     }
 }
