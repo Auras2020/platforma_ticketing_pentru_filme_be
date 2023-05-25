@@ -59,11 +59,9 @@ public class OrderSpecificationImpl {
                         builder.like(builder.lower(showTimingTheatreJoin.get("name")), dto.getSearchString().toLowerCase() + "%"));
                 searchPredicatesList.add(
                         builder.like(builder.lower(showTimingMovieJoin.get("name")), dto.getSearchString().toLowerCase() + "%"));
-                if (dto.getProductName() != null && !dto.getProductName().isEmpty()){
-                    Join<Orders, Product> ordersProductJoin = root.join("product", JoinType.INNER);
-                    searchPredicatesList.add(
-                            builder.like(builder.lower(ordersProductJoin.get("name")), dto.getSearchString().toLowerCase() + "%"));
-                }
+                Join<Orders, Product> ordersProductJoin = root.join("product", JoinType.INNER);
+                searchPredicatesList.add(
+                        builder.like(builder.lower(ordersProductJoin.get("name")), dto.getSearchString().toLowerCase() + "%"));
             }
 
             Predicate searchPredicate = builder.or(searchPredicatesList.toArray(new Predicate[0]));

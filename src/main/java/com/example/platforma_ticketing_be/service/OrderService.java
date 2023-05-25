@@ -371,11 +371,11 @@ public class OrderService {
         List<OrdersDto> ordersDtos = new ArrayList<>();
         for(Object[] object: objects){
             ShowTiming showTiming =  (ShowTiming) object[0];
-            long nrTickets = (long) object[1];
-            String ticketsStatus = (String) object[2];
-            long nrProducts = (long) object[3];
-            String productsStatus = (String) object[4];
-            Date date = (Date) object[5];
+            String ticketsStatus = (String) object[1];
+            long nrProducts = (long) object[2];
+            String productsStatus = (String) object[3];
+            Date date = (Date) object[4];
+            long nrTickets = getTicketsNumber(dto.getUser().getId(), showTiming.getId(), date);
             ordersDtos.add(new OrdersDto(this.modelMapper.map(showTiming, ShowTimingDto.class), dto.getUser(), (int) nrTickets, ticketsStatus, (int) nrProducts, productsStatus, date));
         }
         int totalOrders = 0;
@@ -396,11 +396,11 @@ public class OrderService {
                             dto.getUser().getId(), filteredOrders1);
             for(Object[] object: objects){
                 ShowTiming showTiming =  (ShowTiming) object[0];
-                long nrTickets = (long) object[1];
-                String ticketsStatus = (String) object[2];
-                long nrProducts = (long) object[3];
-                String productsStatus = (String) object[4];
-                Date date = (Date) object[5];
+                String ticketsStatus = (String) object[1];
+                long nrProducts = (long) object[2];
+                String productsStatus = (String) object[3];
+                Date date = (Date) object[4];
+                long nrTickets = getTicketsNumber(dto.getUser().getId(), showTiming.getId(), date);
                 filteredOrders.add(new OrdersDto(this.modelMapper.map(showTiming, ShowTimingDto.class), dto.getUser(), (int) nrTickets, ticketsStatus, (int) nrProducts, productsStatus, date));
             }
             totalOrders = this.orderRepository.findFilteredOrdersOfAUser(PageRequest.of(0, this.orderRepository.findAll().size()), dto.getUser().getId(), filteredOrders1).size();
@@ -435,6 +435,18 @@ public class OrderService {
         }
     }
 
+    public int getTicketsNumber(Long userId, Long showTimingId, Date createdDate){
+        List<Orders> orders = this.orderRepository.findOrdersByUserIdAndShowTimingIdAndCreatedDate(
+                userId, showTimingId, createdDate);
+        int nr = 0;
+        for(Orders order: orders){
+            if(order.getSeat() != null){
+                nr++;
+            }
+        }
+        return nr;
+    }
+
     public List<TicketDetailsDto> getTicketsDetails(OrdersDto ordersDto){
         List<Orders> orders = this.orderRepository.findOrdersByUserIdAndShowTimingIdAndCreatedDate(
                 ordersDto.getUser().getId(), ordersDto.getShowTiming().getId(), ordersDto.getCreatedDate());
@@ -454,7 +466,6 @@ public class OrderService {
         List<ProductDetailsDto> productDetailsDtos = new ArrayList<>();
         for(Orders order: orders){
             if(order.getProduct() != null){
-                System.out.println(order.getProduct().getName() + " " + order.getCreatedDate());
                 productDetailsDtos.add(new ProductDetailsDto(order.getProduct().getName(), order.getProduct().getPrice(),
                         order.getProduct().getQuantity(), order.getNumberProducts()));
             }
@@ -499,8 +510,6 @@ public class OrderService {
     }
 
     public Date getLastOrderCreatedByUserAndShowTiming(UserShowTimingDto userShowTimingDto){
-        System.out.println(userShowTimingDto);
-        System.out.println(this.orderRepository.getLastOrderCreatedByUserAndShowTiming(userShowTimingDto.getUserId(), userShowTimingDto.getShowTimingId()));
         return this.orderRepository.getLastOrderCreatedByUserAndShowTiming(userShowTimingDto.getUserId(), userShowTimingDto.getShowTimingId());
     }
 
