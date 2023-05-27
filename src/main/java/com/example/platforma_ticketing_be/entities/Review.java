@@ -20,6 +20,12 @@ public class Review {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "note", nullable = false)
+    private int note;
+
+    @Column(name = "opinion", nullable = false)
+    private String opinion;
+
     @Column(name = "created_date", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;

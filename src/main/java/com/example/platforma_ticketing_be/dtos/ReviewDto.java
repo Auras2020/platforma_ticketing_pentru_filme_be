@@ -15,6 +15,8 @@ import java.util.Date;
 public class ReviewDto {
     private Long id;
     private String name;
+    private int note;
+    private String opinion;
     private Date createdDate;
     private UserAccount user;
     private MovieDto movie;

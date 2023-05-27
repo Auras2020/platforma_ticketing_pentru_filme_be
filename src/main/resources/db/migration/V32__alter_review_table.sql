@@ -1,0 +1,4 @@
+ALTER TABLE review
+    ADD COLUMN note INTEGER NOT NULL;
+ALTER TABLE review
+    ADD COLUMN opinion varchar(256) NOT NULL;
