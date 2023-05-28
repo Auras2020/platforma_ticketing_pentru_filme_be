@@ -20,6 +20,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, JpaSpecif
             "FROM Movie m " +
             "LEFT JOIN Review r ON r.movie.id = m.id " +
             "WHERE m.id in :moviesIds AND (:isReviewFilterEmpty is true OR (:isReviewFilterEmpty is false AND r.id in :reviewsIds)) " +
-            "ORDER BY m.name, r.createdDate desc")
+            "ORDER BY m.note desc, r.createdDate desc")
     List<Object[]> findFilteredReviews(List<Long> moviesIds, Set<Long> reviewsIds, boolean isReviewFilterEmpty);
 }

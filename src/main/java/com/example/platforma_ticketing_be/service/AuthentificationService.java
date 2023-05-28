@@ -61,7 +61,6 @@ public class AuthentificationService {
             JwtAccessToken accessToken = new JwtAccessToken(token, jwtSecret);
             JwtAuthentication authentication = new JwtAuthentication(accessToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-        userAccount.setToken(token);
         this.userRepository.save(userAccount);
         return (UserDetail) SecurityContextHolder.getContext().getAuthentication().getDetails();
     }
