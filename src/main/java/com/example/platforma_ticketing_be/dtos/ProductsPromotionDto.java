@@ -1,4 +1,3 @@
-/*
 package com.example.platforma_ticketing_be.dtos;
 
 import lombok.*;
@@ -9,5 +8,8 @@ import lombok.*;
 @NoArgsConstructor
 @ToString
 public class ProductsPromotionDto {
+    private Long id;
+    private int nrProducts;
+    private int reduction;
+    private ShowTimingDto showTiming;
 }
-*/

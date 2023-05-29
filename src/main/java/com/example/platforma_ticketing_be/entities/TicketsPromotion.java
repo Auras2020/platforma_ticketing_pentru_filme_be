@@ -15,4 +15,14 @@ public class TicketsPromotion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
+
+    @Column(name = "nr_tickets", nullable = false)
+    private int nrTickets;
+
+    @Column(name = "reduction", nullable = false)
+    private int reduction;
+
+    @ManyToOne
+    @JoinColumn(name="show_timing_id", nullable=false)
+    private ShowTiming showTiming;
 }

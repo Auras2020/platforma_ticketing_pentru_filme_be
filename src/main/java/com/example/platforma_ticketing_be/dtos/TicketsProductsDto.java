@@ -17,4 +17,11 @@ public class TicketsProductsDto {
     private UserAccount user;
     private String ticketStatus;
     private String productStatus;
+    private int nrAdults;
+    private int nrStudents;
+    private int nrChilds;
+    private float ticketsPrice;
+    private int ticketsDiscount;
+    private float productsPrice;
+    private int productsDiscount;
 }

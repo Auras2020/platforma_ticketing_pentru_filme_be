@@ -51,7 +51,10 @@ public class OrderController {
     public void createOrder(@RequestBody TicketsProductsDto ticketsProductsDto) throws DocumentException, IOException {
         this.orderService.createOrder(ticketsProductsDto.getShowTiming(), ticketsProductsDto.getSeats(),
                 ticketsProductsDto.getProductDetails(), ticketsProductsDto.getUser(),
-                ticketsProductsDto.getTicketStatus(), ticketsProductsDto.getProductStatus());
+                ticketsProductsDto.getTicketStatus(), ticketsProductsDto.getProductStatus(),
+                ticketsProductsDto.getNrAdults(), ticketsProductsDto.getNrStudents(), ticketsProductsDto.getNrChilds(),
+                ticketsProductsDto.getTicketsPrice(), ticketsProductsDto.getProductsPrice(),
+                ticketsProductsDto.getTicketsDiscount(), ticketsProductsDto.getProductsDiscount());
     }
 
     @GetMapping("/{id}")

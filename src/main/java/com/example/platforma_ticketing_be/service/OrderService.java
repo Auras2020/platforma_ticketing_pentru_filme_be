@@ -39,19 +39,19 @@ public class OrderService {
     private final ModelMapper modelMapper;
     private final EmailServiceImpl emailService;
     private final ProductRepository productRepository;
-    private final ShowTimingRepository showTimingRepository;
+    private final PeoplePromotionRepository peoplePromotionRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
     private String[] daysOfWeek = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
-    public OrderService(OrderRepository orderRepository, OrderSpecificationImpl orderSpecification, ModelMapper modelMapper, EmailServiceImpl emailService, ProductRepository productRepository, ShowTimingRepository showTimingRepository) {
+    public OrderService(OrderRepository orderRepository, OrderSpecificationImpl orderSpecification, ModelMapper modelMapper, EmailServiceImpl emailService, ProductRepository productRepository, PeoplePromotionRepository peoplePromotionRepository) {
         this.orderRepository = orderRepository;
         this.orderSpecification = orderSpecification;
         this.modelMapper = modelMapper;
         this.emailService = emailService;
         this.productRepository = productRepository;
-        this.showTimingRepository = showTimingRepository;
+        this.peoplePromotionRepository = peoplePromotionRepository;
     }
 
     private void displayParagraph(String message, Document document, Font fontUser, float indentation){
@@ -95,7 +95,9 @@ public class OrderService {
         document.add(image);
     }
 
-    public InputStreamResource getSeatsPdfContent(ShowTimingDto showTimingDto, List<String> seats) throws DocumentException, IOException {
+    public InputStreamResource getSeatsPdfContent(ShowTimingDto showTimingDto, List<String> seats,
+                                                  int nrAdults, int nrStudents, int nrChilds,
+                                                  float ticketsPrice, int ticketsDiscount) throws DocumentException, IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         Document document = new Document(PageSize.A3);
@@ -120,8 +122,10 @@ public class OrderService {
         Font fontTitle = FontFactory.getFont(FontFactory.TIMES_BOLD);
         fontTitle.setSize(16);
 
+        PeoplePromotion peoplePromotion = this.peoplePromotionRepository.findPeoplePromotionByShowTimingId(showTimingDto.getId());
+
         for(int i = 0; i < seats.size(); i++){
-            if(i % 4 == 0 && i != 0){
+            if(i % 3 == 0 && i != 0){
                 document.newPage();
             }
             displayParagraph("Ticket " +  (i + 1), document, fontTitle, 0);
@@ -142,7 +146,18 @@ public class OrderService {
 
             displayParagraph("Theatre name: " + showTimingDto.getTheatre().getName(), document, font, 0);
             displayParagraph("Venue: " + showTimingDto.getVenue().getVenueNumber(), document, font, 0);
-
+            if(i < nrAdults){
+                displayParagraph("Category: Adult", document, font, 0);
+                displayParagraph("Price: " + peoplePromotion.getAdult(), document, font, 0);
+            }
+            if(i >= nrAdults && i < nrAdults + nrStudents){
+                displayParagraph("Category: Student", document, font, 0);
+                displayParagraph("Price: " + peoplePromotion.getStudent(), document, font, 0);
+            }
+            if(i >= nrAdults + nrStudents && i < nrAdults + nrStudents + nrChilds){
+                displayParagraph("Category: Child", document, font, 0);
+                displayParagraph("Price: " + peoplePromotion.getChild(), document, font, 0);
+            }
             int i1 = 0;
             int j1 = 0;
 
@@ -168,7 +183,11 @@ public class OrderService {
 
         Font font = FontFactory.getFont(FontFactory.TIMES_BOLD);
         font.setSize(14);
-        displayParagraph("Total price of tickets: " + seats.size() * showTimingDto.getPrice() + " RON", document, font, 0);
+        if(ticketsDiscount != 0){
+            displayParagraph("Total price of tickets: " + ticketsPrice + " RON(" + ticketsDiscount + "% discount)", document, font, 0);
+        } else {
+            displayParagraph("Total price of tickets: " + ticketsPrice + " RON", document, font, 0);
+        }
 
         document.close();
 
@@ -181,7 +200,8 @@ public class OrderService {
         return file;
     }
 
-    public InputStreamResource getProductsPdfContent(ShowTimingDto showTimingDto, List<ProductDetailsDto> productDetails) throws DocumentException, IOException {
+    public InputStreamResource getProductsPdfContent(ShowTimingDto showTimingDto, List<ProductDetailsDto> productDetails,
+                                                     float productsPrice, int productsDiscount) throws DocumentException, IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         Document document = new Document(PageSize.A3);
@@ -245,16 +265,15 @@ public class OrderService {
             sum += productDetailsDto.getNumber();
         }
 
-        int price = 0;
-        for(ProductDetailsDto productDetailsDto: productDetails){
-            price += productDetailsDto.getNumber() * productDetailsDto.getPrice();
-        }
-
         Font font = FontFactory.getFont(FontFactory.TIMES_BOLD);
         font.setSize(14);
         displayParagraphWithSpaceAfter("", document, fontTitle, 0);
         displayParagraph("Total number of products: " + sum, document, font, 0);
-        displayParagraph("Total price of products: " + price + " RON", document, font, 0);
+        if(productsDiscount != 0){
+            displayParagraph("Total price of products: " + productsPrice + " RON(" + productsDiscount + "% discount)", document, font, 0);
+        } else {
+            displayParagraph("Total price of products: " + productsPrice + " RON", document, font, 0);
+        }
 
         document.close();
 
@@ -275,7 +294,11 @@ public class OrderService {
         return calendar.getTime();
     }
 
-    public void createOrder(ShowTimingDto showTimingDto, List<String> seats, List<ProductDetailsDto> productDetails, UserAccount user, String ticketStatus, String productStatus) throws DocumentException, IOException{
+    public void createOrder(ShowTimingDto showTimingDto, List<String> seats, List<ProductDetailsDto> productDetails,
+                            UserAccount user, String ticketStatus, String productStatus,
+                            int nrAdults, int nrStudents, int nrChilds,
+                            float ticketsPrice, float productsPrice,
+                            int ticketsDiscount, int productsDiscount) throws DocumentException, IOException{
         ShowTiming showTiming = this.modelMapper.map(showTimingDto, ShowTiming.class);
         if(productDetails.size() == 0){
             for (String seat : seats) {
@@ -307,13 +330,14 @@ public class OrderService {
 
         List<DataSource> dataSourceList = new ArrayList<>();
 
-        InputStreamResource file = getSeatsPdfContent(showTimingDto, seats);
+        InputStreamResource file = getSeatsPdfContent(showTimingDto, seats, nrAdults, nrStudents, nrChilds,
+                ticketsPrice, ticketsDiscount);
         InputStream inputStream = file.getInputStream();
         DataSource dataSource = new ByteArrayDataSource(inputStream, "application/pdf");
         dataSourceList.add(dataSource);
 
         if(productDetails.size() > 0) {
-            InputStreamResource file1 = getProductsPdfContent(showTimingDto, productDetails);
+            InputStreamResource file1 = getProductsPdfContent(showTimingDto, productDetails, productsPrice, productsDiscount);
             InputStream inputStream1 = file1.getInputStream();
             DataSource dataSource1 = new ByteArrayDataSource(inputStream1, "application/pdf");
             dataSourceList.add(dataSource1);
@@ -512,10 +536,4 @@ public class OrderService {
     public Date getLastOrderCreatedByUserAndShowTiming(UserShowTimingDto userShowTimingDto){
         return this.orderRepository.getLastOrderCreatedByUserAndShowTiming(userShowTimingDto.getUserId(), userShowTimingDto.getShowTimingId());
     }
-
-   /* public OrdersDto refreshOrdersStatus(OrdersDto ordersDto){
-        List<Orders> orders = this.orderRepository.refreshOrdersStatus(
-                ordersDto.getUser().getId(), ordersDto.getShowTiming().getId(), ordersDto.getCreatedDate());
-        return new OrdersDto(this.modelMapper.map(showTiming, ShowTimingDto.class), dto.getUser(), (int) nrTickets, ticketsStatus, (int) nrProducts, productsStatus, date);
-    }*/
 }
