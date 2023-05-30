@@ -3,6 +3,7 @@ package com.example.platforma_ticketing_be.dtos;
 import com.example.platforma_ticketing_be.entities.UserAccount;
 import lombok.*;
 
+import javax.persistence.Column;
 import java.util.Date;
 
 @Getter
@@ -17,5 +18,7 @@ public class OrdersDto {
     private String ticketsStatus;
     private int productsCount;
     private String productsStatus;
+    private float ticketsPrice;
+    private float productsPrice;
     private Date createdDate;
 }

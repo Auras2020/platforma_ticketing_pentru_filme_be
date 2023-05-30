@@ -45,6 +45,10 @@ public class PromotionsService {
         return null;
     }
 
+    public void deletePeoplePromotion(Long id){
+        this.peoplePromotionRepository.deleteById(id);
+    }
+
     public void createTicketsPromotion(TicketsPromotionDto ticketsPromotionDto){
         this.ticketsPromotionRepository.save(this.modelMapper.map(ticketsPromotionDto, TicketsPromotion.class));
     }
@@ -59,6 +63,10 @@ public class PromotionsService {
         return null;
     }
 
+    public void deleteTicketsPromotion(Long id){
+        this.ticketsPromotionRepository.deleteById(id);
+    }
+
     public void createProductsPromotion(ProductsPromotionDto productsPromotionDto){
         this.productsPromotionRepository.save(this.modelMapper.map(productsPromotionDto, ProductsPromotion.class));
     }
@@ -71,5 +79,9 @@ public class PromotionsService {
                     .collect(Collectors.toList());
         }
         return null;
+    }
+
+    public void deleteProductsPromotion(Long id){
+        this.productsPromotionRepository.deleteById(id);
     }
 }

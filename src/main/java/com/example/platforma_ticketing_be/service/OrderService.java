@@ -148,15 +148,27 @@ public class OrderService {
             displayParagraph("Venue: " + showTimingDto.getVenue().getVenueNumber(), document, font, 0);
             if(i < nrAdults){
                 displayParagraph("Category: Adult", document, font, 0);
-                displayParagraph("Price: " + peoplePromotion.getAdult(), document, font, 0);
+                if(peoplePromotion != null){
+                    displayParagraph("Price: " + peoplePromotion.getAdult(), document, font, 0);
+                } else {
+                    displayParagraph("Price: " + showTimingDto.getPrice(), document, font, 0);
+                }
             }
             if(i >= nrAdults && i < nrAdults + nrStudents){
                 displayParagraph("Category: Student", document, font, 0);
-                displayParagraph("Price: " + peoplePromotion.getStudent(), document, font, 0);
+                if(peoplePromotion != null){
+                    displayParagraph("Price: " + peoplePromotion.getStudent(), document, font, 0);
+                } else {
+                    displayParagraph("Price: " + showTimingDto.getPrice(), document, font, 0);
+                }
             }
             if(i >= nrAdults + nrStudents && i < nrAdults + nrStudents + nrChilds){
                 displayParagraph("Category: Child", document, font, 0);
-                displayParagraph("Price: " + peoplePromotion.getChild(), document, font, 0);
+                if(peoplePromotion != null){
+                    displayParagraph("Price: " + peoplePromotion.getChild(), document, font, 0);
+                } else {
+                    displayParagraph("Price: " + showTimingDto.getPrice(), document, font, 0);
+                }
             }
             int i1 = 0;
             int j1 = 0;
@@ -301,29 +313,46 @@ public class OrderService {
                             int ticketsDiscount, int productsDiscount) throws DocumentException, IOException{
         ShowTiming showTiming = this.modelMapper.map(showTimingDto, ShowTiming.class);
         if(productDetails.size() == 0){
+            int j = 0;
             for (String seat : seats) {
-                Orders order = new Orders(showTiming, user, seat, ticketStatus, null, 0, null, getCurrentDate());
+                Orders order;
+                if(j == 0){
+                    order = new Orders(showTiming, user, seat, ticketStatus, null, 0, null, ticketsPrice, productsPrice, getCurrentDate());
+                } else {
+                    order = new Orders(showTiming, user, seat, ticketStatus, null, 0, null, 0, 0, getCurrentDate());
+                }
                 this.orderRepository.save(order);
+                j++;
             }
         } else if(seats.size() >= productDetails.size()){
             for(int i = 0; i < productDetails.size(); i++){
                 Optional<Product> product = this.productRepository.findById(productDetails.get(i).getId());
-                Orders order = new Orders(showTiming, user, seats.get(i), ticketStatus, product.get(), productDetails.get(i).getNumber(), productStatus, getCurrentDate());
+                Orders order;
+                if(i == 0){
+                    order = new Orders(showTiming, user, seats.get(i), ticketStatus, product.get(), productDetails.get(i).getNumber(), productStatus, ticketsPrice, productsPrice, getCurrentDate());
+                } else {
+                    order = new Orders(showTiming, user, seats.get(i), ticketStatus, product.get(), productDetails.get(i).getNumber(), productStatus, 0, 0, getCurrentDate());
+                }
                 this.orderRepository.save(order);
             }
             for(int i = productDetails.size(); i < seats.size(); i++){
-                Orders order = new Orders(showTiming, user, seats.get(i), ticketStatus, null, 0, productStatus, getCurrentDate());
+                Orders order = new Orders(showTiming, user, seats.get(i), ticketStatus, null, 0, productStatus, 0, 0, getCurrentDate());
                 this.orderRepository.save(order);
             }
         } else {
             for(int i = 0; i < seats.size(); i++){
                 Optional<Product> product = this.productRepository.findById(productDetails.get(i).getId());
-                Orders order = new Orders(showTiming, user, seats.get(i), ticketStatus, product.get(), productDetails.get(i).getNumber(), productStatus, getCurrentDate());
+                Orders order;
+                if(i == 0){
+                    order = new Orders(showTiming, user, seats.get(i), ticketStatus, product.get(), productDetails.get(i).getNumber(), productStatus, ticketsPrice, productsPrice, getCurrentDate());
+                } else {
+                    order = new Orders(showTiming, user, seats.get(i), ticketStatus, product.get(), productDetails.get(i).getNumber(), productStatus, 0, 0, getCurrentDate());
+                }
                 this.orderRepository.save(order);
             }
             for(int i = seats.size(); i < productDetails.size(); i++){
                 Optional<Product> product = this.productRepository.findById(productDetails.get(i).getId());
-                Orders order = new Orders(showTiming, user, null, ticketStatus, product.get(), productDetails.get(i).getNumber(), productStatus, getCurrentDate());
+                Orders order = new Orders(showTiming, user, null, ticketStatus, product.get(), productDetails.get(i).getNumber(), productStatus, 0, 0, getCurrentDate());
                 this.orderRepository.save(order);
             }
         }
@@ -399,8 +428,14 @@ public class OrderService {
             long nrProducts = (long) object[2];
             String productsStatus = (String) object[3];
             Date date = (Date) object[4];
+            /*float ticketsPrice = (float) object[5];
+            float productsPrice = (float) object[6];*/
+            //Orders orders2 = (Orders) object[5];
+            Orders orders2 = this.orderRepository.findOrderByShowTiming(showTiming.getId());
             long nrTickets = getTicketsNumber(dto.getUser().getId(), showTiming.getId(), date);
-            ordersDtos.add(new OrdersDto(this.modelMapper.map(showTiming, ShowTimingDto.class), dto.getUser(), (int) nrTickets, ticketsStatus, (int) nrProducts, productsStatus, date));
+            ordersDtos.add(new OrdersDto(this.modelMapper.map(showTiming, ShowTimingDto.class), dto.getUser(),
+                    (int) nrTickets, ticketsStatus, (int) nrProducts, productsStatus,
+                    orders2.getTicketsPrice(), orders2.getProductsPrice(), date));
         }
         int totalOrders = 0;
         if(this.orderRepository.findAll().size() > 0){
@@ -424,8 +459,14 @@ public class OrderService {
                 long nrProducts = (long) object[2];
                 String productsStatus = (String) object[3];
                 Date date = (Date) object[4];
+                /*float ticketsPrice = (float) object[5];
+                float productsPrice = (float) object[6];*/
+                //Orders orders2 = (Orders) object[5];
+                Orders orders2 = this.orderRepository.findOrderByShowTiming(showTiming.getId());
                 long nrTickets = getTicketsNumber(dto.getUser().getId(), showTiming.getId(), date);
-                filteredOrders.add(new OrdersDto(this.modelMapper.map(showTiming, ShowTimingDto.class), dto.getUser(), (int) nrTickets, ticketsStatus, (int) nrProducts, productsStatus, date));
+                filteredOrders.add(new OrdersDto(this.modelMapper.map(showTiming, ShowTimingDto.class), dto.getUser(),
+                        (int) nrTickets, ticketsStatus, (int) nrProducts, productsStatus,
+                        orders2.getTicketsPrice(), orders2.getProductsPrice(), date));
             }
             totalOrders = this.orderRepository.findFilteredOrdersOfAUser(PageRequest.of(0, this.orderRepository.findAll().size()), dto.getUser().getId(), filteredOrders1).size();
         }
@@ -536,4 +577,52 @@ public class OrderService {
     public Date getLastOrderCreatedByUserAndShowTiming(UserShowTimingDto userShowTimingDto){
         return this.orderRepository.getLastOrderCreatedByUserAndShowTiming(userShowTimingDto.getUserId(), userShowTimingDto.getShowTimingId());
     }
+
+    public List<TicketsNrDto> getTicketsNumber(){
+        List<TicketsNrDto> ticketsNrDtos = new ArrayList<>();
+        List<Object[]> results = this.orderRepository.findNumberOfTicketsPerMovie();
+        List<Object[]> objects = results.subList(0, Math.min(results.size(), 4));
+        for(Object[] object: objects){
+            String movie = (String) object[0];
+            long nr = (long) object[1];
+            ticketsNrDtos.add(new TicketsNrDto(movie, (int) nr));
+        }
+        return ticketsNrDtos;
+    }
+
+    public List<TicketsPriceDto> getTicketsPrice(){
+        List<TicketsPriceDto> ticketsPriceDtos = new ArrayList<>();
+        List<Object[]> results = this.orderRepository.findPriceOfTicketsPerMovie();
+        List<Object[]> objects = results.subList(0, Math.min(results.size(), 4));
+        for(Object[] object: objects){
+            String movie = (String) object[0];
+            double price = (double) object[1];
+            ticketsPriceDtos.add(new TicketsPriceDto(movie, price));
+        }
+        return ticketsPriceDtos;
+    }
+
+    public List<ProductsNrDto> getProductsNumber(){
+        List<ProductsNrDto> productsNrDtos = new ArrayList<>();
+        List<Object[]> objects = this.orderRepository.findNumberOfProductsSold();
+        //List<Object[]> objects = results.subList(0, Math.min(results.size(), 4));
+        for(Object[] object: objects){
+            String movie = (String) object[0];
+            long nr = (long) object[1];
+            productsNrDtos.add(new ProductsNrDto(movie, (int) nr));
+        }
+        return productsNrDtos;
+    }
+
+    /*public List<ProductsPriceDto> getProductsPrice(){
+        List<ProductsPriceDto> productsPriceDtos = new ArrayList<>();
+        List<Object[]> results = this.orderRepository.findPriceOfProductsPerMovie();
+        List<Object[]> objects = results.subList(0, Math.min(results.size(), 4));
+        for(Object[] object: objects){
+            String movie = (String) object[0];
+            double price = (double) object[1];
+            productsPriceDtos.add(new ProductsPriceDto(movie, price));
+        }
+        return productsPriceDtos;
+    }*/
 }

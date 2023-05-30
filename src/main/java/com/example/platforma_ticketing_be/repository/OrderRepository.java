@@ -14,7 +14,7 @@ import java.util.Set;
 @Repository
 public interface OrderRepository extends JpaRepository<Orders, Long>, JpaSpecificationExecutor<Orders> {
 
-    @Query("SELECT st, o.ticketStatus, SUM(o.numberProducts), o.productsStatus, o.createdDate  " +
+    @Query("SELECT st, o.ticketStatus, SUM(o.numberProducts), o.productsStatus, o.createdDate " +
             "FROM ShowTiming st " +
             "INNER JOIN Orders o ON o.showTiming.id = st.id " +
             "WHERE o.user.id = :id " +
@@ -22,13 +22,16 @@ public interface OrderRepository extends JpaRepository<Orders, Long>, JpaSpecifi
             "ORDER BY st.day desc, st.time desc")
     List<Object[]> findOrdersOfAUser(Pageable pageable, Long id);
 
-    @Query("SELECT st, o.ticketStatus, SUM(o.numberProducts), o.productsStatus, o.createdDate  " +
+    @Query("SELECT st, o.ticketStatus, SUM(o.numberProducts), o.productsStatus, o.createdDate " +
             "FROM ShowTiming st " +
             "INNER JOIN Orders o ON o.showTiming.id = st.id " +
             "WHERE o.user.id = :id and o.id in :ids " +
             "GROUP BY st, o.createdDate, o.ticketStatus, o.productsStatus " +
             "ORDER BY st.day desc, st.time desc")
     List<Object[]> findFilteredOrdersOfAUser(Pageable pageable, Long id, Set<Long> ids);
+
+    @Query("SELECT o FROM Orders o WHERE o.showTiming.id = ?1 AND o.ticketsPrice > 0")
+    Orders findOrderByShowTiming(Long showTimingId);
 
     List<Orders> findOrdersByUserIdAndShowTimingIdAndCreatedDate(Long userId, Long showTimingId, Date date);
 
@@ -41,8 +44,41 @@ public interface OrderRepository extends JpaRepository<Orders, Long>, JpaSpecifi
     @Query("SELECT DISTINCT MAX(o.createdDate) FROM Orders o WHERE o.user.id = ?1 AND o.showTiming.id = ?2")
     Date getLastOrderCreatedByUserAndShowTiming(Long userId, Long showTimingId);
 
-    /*@Query("SELECT o.showTiming, COUNT(o.seat), o.ticketStatus, SUM(o.numberProducts), o.productsStatus, o.createdDate  " +
+    @Query("SELECT o.showTiming.movie.name, COUNT(o.showTiming.movie.id) AS number_of_tickets " +
             "FROM Orders o " +
-            "WHERE o.user.id = ?1 AND o.showTiming.id = ?2 AND o.createdDate = ?3")
-    List<Orders> refreshOrdersStatus(Long userId, Long showTimingId, Date date);*/
+            "WHERE o.seat IS NOT NULL " +
+            "GROUP BY o.showTiming.movie.name " +
+            "ORDER BY number_of_tickets desc")
+    List<Object[]> findNumberOfTicketsPerMovie();
+
+    @Query("SELECT o.showTiming.movie.name, SUM(o.ticketsPrice) AS price_of_tickets " +
+            "FROM Orders o " +
+            "GROUP BY o.showTiming.movie.name " +
+            "ORDER BY price_of_tickets desc")
+    List<Object[]> findPriceOfTicketsPerMovie();
+
+    @Query("SELECT o.product.name, SUM(o.numberProducts) AS number_of_products " +
+            "FROM Orders o " +
+            "WHERE o.product.id IS NOT NULL " +
+            "GROUP BY o.product.name " +
+            "ORDER BY number_of_products desc")
+    List<Object[]> findNumberOfProductsSold();
+
+   /* @Query("SELECT o.product.name, SUM(o.product.price) AS price_of_products " +
+            "FROM Orders o " +
+            "GROUP BY o.product.name " +
+            "ORDER BY price_of_products desc")
+    List<Object[]> findPriceOfProductsPerMovie();*/
+
+    /*@Query("SELECT o.showTiming.movie.name, COUNT(o.showTiming.movie.id) AS number_of_tickets " +
+            "FROM Orders o " +
+            "GROUP BY o.showTiming.movie.name " +
+            "ORDER BY number_of_tickets desc")
+    List<Object[]> findNumberOfTicketsPerMovie();
+
+    @Query("SELECT o.showTiming.movie.name, SUM(o.ticketsPrice) AS price_of_tickets " +
+            "FROM Orders o " +
+            "GROUP BY o.showTiming.movie.name " +
+            "ORDER BY price_of_tickets desc")
+    List<Object[]> findPriceOfTicketsPerMovie();*/
 }

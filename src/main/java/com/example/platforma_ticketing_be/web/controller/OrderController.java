@@ -66,4 +66,24 @@ public class OrderController {
     public Date getLastOrderCreatedByUserAndShowTiming(@RequestBody UserShowTimingDto userShowTimingDto) {
         return this.orderService.getLastOrderCreatedByUserAndShowTiming(userShowTimingDto);
     }
+
+    @GetMapping("/tickets-number-chart")
+    public List<TicketsNrDto> getTicketsNumber(){
+        return this.orderService.getTicketsNumber();
+    }
+
+    @GetMapping("/tickets-price-chart")
+    public List<TicketsPriceDto> getTicketsPrice(){
+        return this.orderService.getTicketsPrice();
+    }
+
+    @GetMapping("/products-number-chart")
+    public List<ProductsNrDto> getProductsNumber(){
+        return this.orderService.getProductsNumber();
+    }
+
+   /* @GetMapping("/products-price-chart")
+    public List<ProductsPriceDto> getProductsPrice(){
+        return this.orderService.getProductsPrice();
+    }*/
 }

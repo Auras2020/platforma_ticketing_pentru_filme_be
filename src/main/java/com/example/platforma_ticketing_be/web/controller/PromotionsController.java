@@ -28,6 +28,11 @@ public class PromotionsController {
         return this.promotionsService.getPeoplePromotionByShowTimingId(id);
     }
 
+    @DeleteMapping(value = "/people/{id}")
+    public void deletePeoplePromotion(@PathVariable("id") Long id){
+        this.promotionsService.deletePeoplePromotion(id);
+    }
+
     @PutMapping("/tickets")
     public void createTicketsPromotion(@RequestBody TicketsPromotionDto ticketsPromotionDto){
         this.promotionsService.createTicketsPromotion(ticketsPromotionDto);
@@ -38,6 +43,11 @@ public class PromotionsController {
         return this.promotionsService.getTicketsPromotionByShowTimingId(id);
     }
 
+    @DeleteMapping(value = "/tickets/{id}")
+    public void deleteTicketsPromotion(@PathVariable("id") Long id){
+        this.promotionsService.deleteTicketsPromotion(id);
+    }
+
     @PutMapping("/products")
     public void createProductsPromotion(@RequestBody ProductsPromotionDto productsPromotionDto){
         this.promotionsService.createProductsPromotion(productsPromotionDto);
@@ -46,5 +56,10 @@ public class PromotionsController {
     @GetMapping("/products/{id}")
     List<ProductsPromotionDto> getProductsPromotionByShowTimingId(@PathVariable("id") Long id){
         return this.promotionsService.getProductsPromotionByShowTimingId(id);
+    }
+
+    @DeleteMapping(value = "/products/{id}")
+    public void deleteProductsPromotion(@PathVariable("id") Long id){
+        this.promotionsService.deleteProductsPromotion(id);
     }
 }

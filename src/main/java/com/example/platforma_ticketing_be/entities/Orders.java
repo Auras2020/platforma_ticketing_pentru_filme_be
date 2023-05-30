@@ -43,11 +43,19 @@ public class Orders {
     @Column(name = "products_status")
     private String productsStatus;
 
+    @Column(name = "tickets_price")
+    private float ticketsPrice;
+
+    @Column(name = "products_price")
+    private float productsPrice;
+
     @Column(name = "created_date", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
 
-    public Orders(ShowTiming showTiming, UserAccount user, String seat, String ticketStatus, Product product, int numberProducts, String productsStatus, Date createdDate) {
+    public Orders(ShowTiming showTiming, UserAccount user, String seat, String ticketStatus, Product product,
+                  int numberProducts, String productsStatus,
+                  float ticketsPrice, float productsPrice, Date createdDate) {
         this.showTiming = showTiming;
         this.user = user;
         this.seat = seat;
@@ -55,6 +63,8 @@ public class Orders {
         this.product = product;
         this.numberProducts = numberProducts;
         this.productsStatus = productsStatus;
+        this.ticketsPrice = ticketsPrice;
+        this.productsPrice = productsPrice;
         this.createdDate = createdDate;
     }
 }
