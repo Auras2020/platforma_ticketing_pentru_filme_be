@@ -27,7 +27,7 @@ public class TheatreSpecificationImpl {
                 predicates.add(builder.like(builder.lower(root.get("location")), dto.getLocation().toLowerCase() + "%"));
             }
             if (dto.getAddress() != null && !dto.getAddress().isEmpty()) {
-                predicates.add(builder.like(builder.lower(root.get("address")), dto.getAddress().toLowerCase() + "%"));
+                predicates.add(builder.like(builder.lower(root.get("address")), "%" + dto.getAddress().toLowerCase() + "%"));
             }
 
             if ((dto.getSearchString() != null) && !(dto.getSearchString().isEmpty())) {
@@ -36,7 +36,7 @@ public class TheatreSpecificationImpl {
                 searchPredicatesList.add(
                         builder.like(builder.lower(root.get("location")), dto.getSearchString().toLowerCase() + "%"));
                 searchPredicatesList.add(
-                        builder.like(builder.lower(root.get("address")), dto.getSearchString().toLowerCase() + "%"));
+                        builder.like(builder.lower(root.get("address")), "%" + dto.getSearchString().toLowerCase() + "%"));
             }
 
             Predicate searchPredicate = builder.or(searchPredicatesList.toArray(new Predicate[0]));

@@ -22,4 +22,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, JpaSpecif
             "WHERE m.id in :moviesIds AND (:isReviewFilterEmpty is true OR (:isReviewFilterEmpty is false AND r.id in :reviewsIds)) " +
             "ORDER BY m.note desc, r.createdDate desc")
     List<Object[]> findFilteredReviews(List<Long> moviesIds, Set<Long> reviewsIds, boolean isReviewFilterEmpty);
+
+    @Query("SELECT COUNT(r.id) FROM Review r")
+    Integer getNumberOfReviews();
 }

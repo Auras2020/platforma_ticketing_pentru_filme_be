@@ -95,7 +95,7 @@ public class MovieSpecificationImpl {
                 searchPredicatesList.add(
                         builder.like(builder.lower(root.get("director")), dto.getSearchString().toLowerCase() + "%"));
                 searchPredicatesList.add(
-                        builder.like(builder.lower(root.get("synopsis")), dto.getSearchString().toLowerCase() + "%"));
+                        builder.like(builder.lower(root.get("synopsis")), "%" + dto.getSearchString().toLowerCase() + "%"));
             }
 
             Predicate searchPredicate = builder.or(searchPredicatesList.toArray(new Predicate[0]));

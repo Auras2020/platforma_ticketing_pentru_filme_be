@@ -20,43 +20,13 @@ public class ReviewSpecificationImpl {
     public Specification<Review> getReviews(ReviewFilterDto dto) {
         return (root, query, builder) -> {
             List<Predicate> predicates = new ArrayList<>();
-            //List<Predicate> searchPredicatesList = new ArrayList<>();
-
-           /* if (dto.getMovieName() != null && !dto.getMovieName().isEmpty()) {
-                Join<Review, Movie> reviewMovieJoin = root.join("movie", JoinType.INNER);
-                predicates.add(builder.equal((reviewMovieJoin.get("name")), dto.getMovieName()));
-            }
-            if (dto.getRecommendedAge() != null && !dto.getRecommendedAge().isEmpty()) {
-                Join<Review, Movie> reviewMovieJoin = root.join("movie", JoinType.INNER);
-                predicates.add(builder.equal((reviewMovieJoin.get("recommendedAge")), dto.getRecommendedAge()));
-            }
-            if (dto.getGenre() != null && !dto.getGenre().isEmpty()) {
-                Join<Review, Movie> reviewMovieJoin = root.join("movie", JoinType.INNER);
-                predicates.add(builder.equal(builder.upper(reviewMovieJoin.get("genre")), dto.getGenre().toUpperCase()));
-            }*/
             if (dto.getReviewName() != null && !dto.getReviewName().isEmpty()) {
                 predicates.add(builder.like(builder.lower(root.get("name")), "%" + dto.getReviewName().toLowerCase() + "%"));
             }
             if (dto.getReviewOpinion() != null && !dto.getReviewOpinion().isEmpty()) {
                 predicates.add(builder.equal(builder.upper(root.get("opinion")), dto.getReviewOpinion().toUpperCase()));
             }
-
-           /* if ((dto.getSearchString() != null) && !(dto.getSearchString().isEmpty())) {
-                *//*Join<Review, Movie> reviewMovieJoin = root.join("movie", JoinType.INNER);
-                searchPredicatesList.add(
-                        builder.like(builder.lower(reviewMovieJoin.get("name")), dto.getSearchString().toLowerCase() + "%"));
-                searchPredicatesList.add(
-                        builder.like(builder.lower(reviewMovieJoin.get("genre")), dto.getSearchString().toLowerCase() + "%"));*//*
-                searchPredicatesList.add(
-                        builder.like(builder.lower(root.get("name")), dto.getSearchString().toLowerCase() + "%"));
-            }*/
-
-            //Predicate searchPredicate = builder.or(searchPredicatesList.toArray(new Predicate[0]));
-
-            //if (searchPredicatesList.isEmpty()){
-                return builder.and(predicates.toArray(new Predicate[0]));
-            /*}
-            return builder.and(filterPredicate, searchPredicate);*/
+            return builder.and(predicates.toArray(new Predicate[0]));
         };
     }
 }

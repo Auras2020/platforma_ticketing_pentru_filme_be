@@ -82,8 +82,13 @@ public class OrderController {
         return this.orderService.getProductsNumber();
     }
 
-   /* @GetMapping("/products-price-chart")
-    public List<ProductsPriceDto> getProductsPrice(){
-        return this.orderService.getProductsPrice();
+  /*  @GetMapping("/number-tickets")
+    public Integer getNumberOfTicketsSold(){
+        return this.orderService.getNumberOfTicketsSold();
+    }
+
+    @GetMapping("/number-products")
+    public Integer getNumberOfProductsSold(){
+        return this.orderService.getNumberOfProductsSold();
     }*/
 }

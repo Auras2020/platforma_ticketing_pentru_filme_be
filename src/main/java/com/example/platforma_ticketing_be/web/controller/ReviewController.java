@@ -41,4 +41,9 @@ public class ReviewController {
     List<ReviewDto> getAllExistingReviewsByMovieId(@PathVariable("id") Long id){
         return this.reviewService.getAllExistingReviewsByMovieId(id);
     }
+
+    /*@GetMapping("/number-reviews")
+    public Integer getNumberOfReviews(){
+        return this.reviewService.getNumberOfReviews();
+    }*/
 }

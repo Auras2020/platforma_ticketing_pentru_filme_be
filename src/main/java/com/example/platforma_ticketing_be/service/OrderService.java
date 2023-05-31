@@ -605,7 +605,6 @@ public class OrderService {
     public List<ProductsNrDto> getProductsNumber(){
         List<ProductsNrDto> productsNrDtos = new ArrayList<>();
         List<Object[]> objects = this.orderRepository.findNumberOfProductsSold();
-        //List<Object[]> objects = results.subList(0, Math.min(results.size(), 4));
         for(Object[] object: objects){
             String movie = (String) object[0];
             long nr = (long) object[1];
@@ -613,16 +612,4 @@ public class OrderService {
         }
         return productsNrDtos;
     }
-
-    /*public List<ProductsPriceDto> getProductsPrice(){
-        List<ProductsPriceDto> productsPriceDtos = new ArrayList<>();
-        List<Object[]> results = this.orderRepository.findPriceOfProductsPerMovie();
-        List<Object[]> objects = results.subList(0, Math.min(results.size(), 4));
-        for(Object[] object: objects){
-            String movie = (String) object[0];
-            double price = (double) object[1];
-            productsPriceDtos.add(new ProductsPriceDto(movie, price));
-        }
-        return productsPriceDtos;
-    }*/
 }

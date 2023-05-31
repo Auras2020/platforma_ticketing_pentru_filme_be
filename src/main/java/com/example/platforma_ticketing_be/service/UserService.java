@@ -3,10 +3,7 @@ package com.example.platforma_ticketing_be.service;
 import com.example.platforma_ticketing_be.dtos.*;
 import com.example.platforma_ticketing_be.entities.UserAccount;
 import com.example.platforma_ticketing_be.entities.UserRole;
-import com.example.platforma_ticketing_be.repository.MovieRepository;
-import com.example.platforma_ticketing_be.repository.TheatreRepository;
-import com.example.platforma_ticketing_be.repository.UserRepository;
-import com.example.platforma_ticketing_be.repository.UserSpecificationImpl;
+import com.example.platforma_ticketing_be.repository.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,13 +21,17 @@ public class UserService {
     private final ModelMapper modelMapper;
     private final UserSpecificationImpl userSpecification;
     private final TheatreRepository theatreRepository;
+    private final OrderRepository orderRepository;
+    private final ReviewRepository reviewRepository;
     private final MovieRepository movieRepository;
 
-    public UserService(UserRepository userRepository, ModelMapper modelMapper, UserSpecificationImpl userSpecification, TheatreRepository theatreRepository, MovieRepository movieRepository) {
+    public UserService(UserRepository userRepository, ModelMapper modelMapper, UserSpecificationImpl userSpecification, TheatreRepository theatreRepository, OrderRepository orderRepository, ReviewRepository reviewRepository, MovieRepository movieRepository) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
         this.userSpecification = userSpecification;
         this.theatreRepository = theatreRepository;
+        this.orderRepository = orderRepository;
+        this.reviewRepository = reviewRepository;
         this.movieRepository = movieRepository;
     }
 
@@ -77,7 +78,10 @@ public class UserService {
         int theatres = this.theatreRepository.findAll().size();
         int movies = this.movieRepository.findAll().size();
         int users = this.userRepository.findAll().size();
-        return new DashboardDto(theatres, movies, users);
+        int tickets = this.orderRepository.getNumberOfTicketsSold();
+        int products = this.orderRepository.getNumberOfProductsSold();
+        int reviews = this.reviewRepository.getNumberOfReviews();
+        return new DashboardDto(theatres, movies, users, tickets, products, reviews);
     }
 
     public UserAccount findByEmail(String email){

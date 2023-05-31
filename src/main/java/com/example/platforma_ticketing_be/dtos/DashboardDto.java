@@ -11,4 +11,7 @@ public class DashboardDto {
     private int theatres;
     private int movies;
     private int users;
+    private int tickets;
+    private int products;
+    private int reviews;
 }

@@ -46,39 +46,28 @@ public interface OrderRepository extends JpaRepository<Orders, Long>, JpaSpecifi
 
     @Query("SELECT o.showTiming.movie.name, COUNT(o.showTiming.movie.id) AS number_of_tickets " +
             "FROM Orders o " +
-            "WHERE o.seat IS NOT NULL " +
+            "WHERE o.seat IS NOT NULL AND o.ticketStatus <> 'cancelled' " +
             "GROUP BY o.showTiming.movie.name " +
             "ORDER BY number_of_tickets desc")
     List<Object[]> findNumberOfTicketsPerMovie();
 
     @Query("SELECT o.showTiming.movie.name, SUM(o.ticketsPrice) AS price_of_tickets " +
             "FROM Orders o " +
+            "WHERE o.ticketStatus <> 'cancelled' " +
             "GROUP BY o.showTiming.movie.name " +
             "ORDER BY price_of_tickets desc")
     List<Object[]> findPriceOfTicketsPerMovie();
 
     @Query("SELECT o.product.name, SUM(o.numberProducts) AS number_of_products " +
             "FROM Orders o " +
-            "WHERE o.product.id IS NOT NULL " +
+            "WHERE o.product.id IS NOT NULL AND o.productsStatus <> 'cancelled' " +
             "GROUP BY o.product.name " +
             "ORDER BY number_of_products desc")
     List<Object[]> findNumberOfProductsSold();
 
-   /* @Query("SELECT o.product.name, SUM(o.product.price) AS price_of_products " +
-            "FROM Orders o " +
-            "GROUP BY o.product.name " +
-            "ORDER BY price_of_products desc")
-    List<Object[]> findPriceOfProductsPerMovie();*/
+    @Query("SELECT COUNT(o.id) FROM Orders o WHERE o.ticketStatus <> 'cancelled' AND o.seat IS NOT NULL")
+    Integer getNumberOfTicketsSold();
 
-    /*@Query("SELECT o.showTiming.movie.name, COUNT(o.showTiming.movie.id) AS number_of_tickets " +
-            "FROM Orders o " +
-            "GROUP BY o.showTiming.movie.name " +
-            "ORDER BY number_of_tickets desc")
-    List<Object[]> findNumberOfTicketsPerMovie();
-
-    @Query("SELECT o.showTiming.movie.name, SUM(o.ticketsPrice) AS price_of_tickets " +
-            "FROM Orders o " +
-            "GROUP BY o.showTiming.movie.name " +
-            "ORDER BY price_of_tickets desc")
-    List<Object[]> findPriceOfTicketsPerMovie();*/
+    @Query("SELECT SUM(o.numberProducts) FROM Orders o WHERE o.productsStatus <> 'cancelled' AND o.product.id IS NOT NULL")
+    Integer getNumberOfProductsSold();
 }
