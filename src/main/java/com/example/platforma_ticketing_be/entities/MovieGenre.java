@@ -9,5 +9,10 @@ public enum MovieGenre {
     ROMANCE,
     SF,
     THRILLER,
-    WESTERN
+    WESTERN,
+    CRIME,
+    MYSTERY,
+    FAMILY,
+    ANIMATION,
+    FANTASY
 }

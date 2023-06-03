@@ -1,17 +1,18 @@
 package com.example.platforma_ticketing_be.service;
 
 import com.example.platforma_ticketing_be.dtos.*;
+import com.example.platforma_ticketing_be.entities.Genre;
 import com.example.platforma_ticketing_be.entities.Movie;
+import com.example.platforma_ticketing_be.entities.MovieGenres;
 import com.example.platforma_ticketing_be.entities.ShowTiming;
-import com.example.platforma_ticketing_be.repository.MovieRepository;
-import com.example.platforma_ticketing_be.repository.MovieSpecificationImpl;
-import com.example.platforma_ticketing_be.repository.ShowTimingRepository;
+import com.example.platforma_ticketing_be.repository.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
@@ -28,19 +29,24 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class MovieService {
     private final MovieRepository movieRepository;
     private final ModelMapper modelMapper;
     private final MovieSpecificationImpl movieSpecification;
     private final ShowTimingRepository showTimingRepository;
+    private final MovieGenreRepository movieGenreRepository;
+    private final GenreRepository genreRepository;
     @PersistenceContext
     private EntityManager entityManager;
 
-    public MovieService(MovieRepository movieRepository, ModelMapper modelMapper, MovieSpecificationImpl movieSpecification, ShowTimingRepository showTimingRepository) {
+    public MovieService(MovieRepository movieRepository, ModelMapper modelMapper, MovieSpecificationImpl movieSpecification, ShowTimingRepository showTimingRepository, MovieGenreRepository movieGenreRepository, GenreRepository genreRepository) {
         this.movieRepository = movieRepository;
         this.modelMapper = modelMapper;
         this.movieSpecification = movieSpecification;
         this.showTimingRepository = showTimingRepository;
+        this.movieGenreRepository = movieGenreRepository;
+        this.genreRepository = genreRepository;
     }
 
     public List<MovieDto> getAllMovies(){
@@ -70,34 +76,62 @@ public class MovieService {
         return getMoviePageResponse(pageOfMovies);
     }
 
+    private void createMovieGenre(MovieDto movieDto, Movie movie) {
+        for (GenreDto genreDto : movieDto.getGenres()) {
+            Genre genre = new Genre(genreDto.getId(), genreDto.getName());
+            Movie createdMovie = this.movieRepository.findById(movie.getId()).get();
+            MovieGenres movieGenres = new MovieGenres(createdMovie, genre);
+            entityManager.persist(movieGenres);
+        }
+    }
+
+    private void deleteMovieGenre(Long movieId) {
+        this.movieGenreRepository.deleteMovieGenresByMovieId(movieId);
+    }
+
+    private void updateMovieGenre(MovieDto movieDto, Movie movie) {
+        System.out.println(movieDto.getGenres());
+        deleteMovieGenre(movie.getId());
+        for (GenreDto genreDto : movieDto.getGenres()) {
+            Genre genre = new Genre(genreDto.getId(), genreDto.getName());
+            MovieGenres movieGenres = new MovieGenres(movie, genre);
+            if (!this.movieGenreRepository.findAll().contains(movieGenres)) {
+                entityManager.persist(movieGenres);
+            }
+        }
+    }
+
     public Movie create(MultipartFile posterFile, String trailerFile, MovieDto movieDto) throws IOException {
         Movie movie;
-        if(movieDto.getId() != null){
-            if(this.movieRepository.findById(movieDto.getId()).isPresent()){
+        if (movieDto.getId() != null) {
+            if (this.movieRepository.findById(movieDto.getId()).isPresent()) {
                 movie = this.movieRepository.findById(movieDto.getId()).get();
-                if(this.checkIfUploadedFileIsOfImageType(posterFile)){
+                updateMovieGenre(movieDto, movie);
+                if (this.checkIfUploadedFileIsOfImageType(posterFile)) {
                     movieDto.setPoster(posterFile.getBytes());
                     movieDto.setPosterName(posterFile.getOriginalFilename());
-                } else if(posterFile.isEmpty()){
+                } else if (posterFile.isEmpty()) {
                     movieDto.setPoster(movie.getPoster());
                     movieDto.setPosterName(movie.getPosterName());
                 }
             }
         } else {
-            if(this.checkIfUploadedFileIsOfImageType(posterFile)){
+            if (this.checkIfUploadedFileIsOfImageType(posterFile)) {
                 movieDto.setPoster(posterFile.getBytes());
                 movieDto.setPosterName(posterFile.getOriginalFilename());
             }
         }
-        if(trailerFile != null){
+        if (trailerFile != null) {
             movieDto.setTrailerName(trailerFile);
         }
         movie = this.modelMapper.map(movieDto, Movie.class);
-        movieRepository.save(movie);
+        Movie createdMovie = movieRepository.save(movie);
+        createMovieGenre(movieDto, createdMovie);
         return movie;
     }
 
     public void delete(Long id){
+        deleteMovieGenre(id);
         Optional<Movie> movieOptional = movieRepository.findById(id);
         if (movieOptional.isEmpty()) {
             throw new EntityNotFoundException(Movie.class.getSimpleName() + " with id: " + id);
@@ -257,6 +291,23 @@ public class MovieService {
         List<Movie> filteredMovies = filterMovies(moviesAvailable, specification);
         return filteredMovies.stream()
                 .map(movie -> this.modelMapper.map(movie, MovieDto.class))
+                .collect(Collectors.toList());
+    }
+
+    public List<GenreDto> findGenresOfAMovie(Long movieId){
+        List<MovieGenres> movieGenres =
+                this.movieGenreRepository.findMovieGenresByMovieId(movieId);
+        List<GenreDto> genreDtos = new ArrayList<>();
+        for(MovieGenres movieGenres1: movieGenres){
+            GenreDto genreDto = new GenreDto(movieGenres1.getGenre().getId(), movieGenres1.getGenre().getName());
+            genreDtos.add(genreDto);
+        }
+        return genreDtos;
+    }
+
+    public List<GenreDto> getAllGenres(){
+        return this.genreRepository.findAll().stream()
+                .map(genre -> this.modelMapper.map(genre, GenreDto.class))
                 .collect(Collectors.toList());
     }
 }

@@ -15,6 +15,6 @@ import java.util.Set;
 @Repository
 public interface VenueRepository extends JpaRepository<Venue, Long>, JpaSpecificationExecutor<Venue> {
 
-    @Query("select v from Venue v where v.theatre.id = ?1")
+    @Query("select v from Venue v where v.theatre.id = ?1 order by v.venueNumber")
     Set<Venue> getAllVenueNumbersOfGivenTheatre(Long theatreId);
 }

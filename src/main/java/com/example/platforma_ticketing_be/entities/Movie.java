@@ -6,6 +6,7 @@ import lombok.ToString;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -34,8 +35,8 @@ public class Movie {
     @Column(name = "poster_name")
     private String posterName;
 
-    @Column(name = "genre", nullable = false)
-    private String genre;
+    /*@Column(name = "genre", nullable = false)
+    private String genre;*/
 
     @Column(name = "duration", nullable = false)
     private int duration;
@@ -54,4 +55,7 @@ public class Movie {
 
     @Column(name = "trailer_name")
     private String trailerName;
+
+    @OneToMany(mappedBy = "movie")
+    private Set<MovieGenres> movieGenres;
 }

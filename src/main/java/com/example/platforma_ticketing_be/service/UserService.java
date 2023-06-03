@@ -79,7 +79,7 @@ public class UserService {
         int movies = this.movieRepository.findAll().size();
         int users = this.userRepository.findAll().size();
         int tickets = this.orderRepository.getNumberOfTicketsSold();
-        int products = this.orderRepository.getNumberOfProductsSold();
+        int products = this.orderRepository.getNumberOfProductsSold() == null ? 0 : this.orderRepository.getNumberOfProductsSold();
         int reviews = this.reviewRepository.getNumberOfReviews();
         return new DashboardDto(theatres, movies, users, tickets, products, reviews);
     }

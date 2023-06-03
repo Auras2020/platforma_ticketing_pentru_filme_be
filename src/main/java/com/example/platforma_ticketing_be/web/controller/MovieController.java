@@ -105,4 +105,14 @@ public class MovieController {
     public List<MovieDto> getRecomendedMovies(@RequestBody MovieFilterAgeDto movieFilterAgeDto){
         return this.movieService.getRecomendedMovies(movieFilterAgeDto.getMovieFilter(), movieFilterAgeDto.getAge());
     }
+
+    @GetMapping("/genres/{id}")
+    public List<GenreDto> findGenresOfAMovie(@PathVariable Long id){
+        return this.movieService.findGenresOfAMovie(id);
+    }
+
+    @GetMapping("genres")
+    public List<GenreDto> getAllGenres(){
+        return this.movieService.getAllGenres();
+    }
 }

@@ -3,6 +3,7 @@ package com.example.platforma_ticketing_be.dtos;
 import lombok.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter

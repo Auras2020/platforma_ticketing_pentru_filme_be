@@ -2,7 +2,7 @@ package com.example.platforma_ticketing_be.dtos;
 
 import lombok.*;
 
-import javax.persistence.Column;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -16,7 +16,7 @@ public class MovieDto {
     private String recommendedAge;
     private byte[] poster;
     private String posterName;
-    private String genre;
+    private Set<GenreDto> genres;
     private int duration;
     private String actors;
     private String director;

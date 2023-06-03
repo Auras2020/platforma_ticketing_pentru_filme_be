@@ -1,13 +1,16 @@
 package com.example.platforma_ticketing_be.repository;
 
 import com.example.platforma_ticketing_be.dtos.MovieFilterDto;
-import com.example.platforma_ticketing_be.entities.Movie;
-import com.example.platforma_ticketing_be.entities.MovieGenre;
+import com.example.platforma_ticketing_be.entities.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -56,14 +59,25 @@ public class MovieSpecificationImpl {
             if (dto.getRecommendedAge() != null && !dto.getRecommendedAge().isEmpty()) {
                 predicates.add(builder.equal((root.get("recommendedAge")), dto.getRecommendedAge()));
             }
-            if (dto.getGenre() != null && !dto.getGenre().isEmpty()) {
-                if (checkIfMovieGenreExists(dto.getGenre().toUpperCase())){
-                    predicates.add(
-                            builder.equal(builder.upper(root.get("genre")), dto.getGenre().toUpperCase()));
-                } else{
-                    throw new EnumConstantNotPresentException(
-                            MovieGenre.class, dto.getGenre() + " does not exists");
+            if (dto.getGenre() != null && dto.getGenre().length > 0) {
+                Join<Movie, MovieGenres> movieMovieGenresJoin = root.join("movieGenres", JoinType.INNER);
+                Join<MovieGenres, Genre> movieGenresGenreJoin = movieMovieGenresJoin.join("genre", JoinType.INNER);
+                Expression<String> genreExpression = movieGenresGenreJoin.get("name");
+                String[] genres = dto.getGenre();
+                List<Predicate> genrePredicates = new ArrayList<>();
+
+                for (String genre : genres) {
+                    if (checkIfMovieGenreExists(genre.toUpperCase())) {
+                        genrePredicates.add(builder.equal(builder.upper(genreExpression), genre.toUpperCase()));
+                    } else {
+                        throw new EnumConstantNotPresentException(MovieGenre.class, genre + " does not exist");
+                    }
                 }
+
+                Predicate genrePredicate = builder.or(genrePredicates.toArray(new Predicate[0]));
+                predicates.add(genrePredicate);
+
+                query.distinct(true);
             }
             if (dto.getDuration() != null && !dto.getDuration().isEmpty()) {
                 if(dto.getDuration().contains("<")){
@@ -88,8 +102,13 @@ public class MovieSpecificationImpl {
             if ((dto.getSearchString() != null) && !(dto.getSearchString().isEmpty())) {
                 searchPredicatesList.add(
                         builder.like(builder.lower(root.get("name")), dto.getSearchString().toLowerCase() + "%"));
+
+                Join<Movie, MovieGenres> movieMovieGenresJoin = root.join("movieGenres", JoinType.INNER);
+                Join<MovieGenres, Genre> movieGenresGenreJoin = movieMovieGenresJoin.join("genre", JoinType.INNER);
                 searchPredicatesList.add(
-                        builder.like(builder.lower(root.get("genre")), dto.getSearchString().toLowerCase() + "%"));
+                        builder.like(builder.lower(movieGenresGenreJoin.get("name")), dto.getSearchString().toLowerCase() + "%"));
+                query.distinct(true);
+
                 searchPredicatesList.add(
                         builder.like(builder.lower(root.get("actors")), dto.getSearchString().toLowerCase() + "%"));
                 searchPredicatesList.add(

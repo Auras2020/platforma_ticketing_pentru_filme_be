@@ -1,16 +1,13 @@
 package com.example.platforma_ticketing_be.repository;
 
 import com.example.platforma_ticketing_be.dtos.UserFilterDto;
-import com.example.platforma_ticketing_be.entities.Role;
 import com.example.platforma_ticketing_be.entities.UserAccount;
 import com.example.platforma_ticketing_be.entities.UserRole;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Component

@@ -10,7 +10,7 @@ import lombok.*;
 public class ReviewFilterDto {
     private String movieName;
     private String recommendedAge;
-    private String genre;
+    private String[] genre;
     private String reviewName;
     private String reviewOpinion;
     private String searchString;
