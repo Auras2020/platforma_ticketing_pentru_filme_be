@@ -81,14 +81,4 @@ public class OrderController {
     public List<ProductsNrDto> getProductsNumber(){
         return this.orderService.getProductsNumber();
     }
-
-  /*  @GetMapping("/number-tickets")
-    public Integer getNumberOfTicketsSold(){
-        return this.orderService.getNumberOfTicketsSold();
-    }
-
-    @GetMapping("/number-products")
-    public Integer getNumberOfProductsSold(){
-        return this.orderService.getNumberOfProductsSold();
-    }*/
 }

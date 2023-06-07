@@ -4,6 +4,7 @@ import com.example.platforma_ticketing_be.dtos.*;
 import com.example.platforma_ticketing_be.entities.UserAccount;
 import com.example.platforma_ticketing_be.entities.UserRole;
 import com.example.platforma_ticketing_be.repository.*;
+import com.example.platforma_ticketing_be.service.email.EmailServiceImpl;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,8 +26,9 @@ public class UserService {
     private final OrderRepository orderRepository;
     private final ReviewRepository reviewRepository;
     private final MovieRepository movieRepository;
+    private final EmailServiceImpl emailService;
 
-    public UserService(UserRepository userRepository, ModelMapper modelMapper, UserSpecificationImpl userSpecification, TheatreRepository theatreRepository, OrderRepository orderRepository, ReviewRepository reviewRepository, MovieRepository movieRepository) {
+    public UserService(UserRepository userRepository, ModelMapper modelMapper, UserSpecificationImpl userSpecification, TheatreRepository theatreRepository, OrderRepository orderRepository, ReviewRepository reviewRepository, MovieRepository movieRepository, EmailServiceImpl emailService) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
         this.userSpecification = userSpecification;
@@ -33,12 +36,17 @@ public class UserService {
         this.orderRepository = orderRepository;
         this.reviewRepository = reviewRepository;
         this.movieRepository = movieRepository;
+        this.emailService = emailService;
     }
 
     public UserAccount create(UserCreateDTO userCreateDTO){
         UserAccount userAccount = this.modelMapper.map(userCreateDTO, UserAccount.class);
         userAccount.setRole(String.valueOf(UserRole.CLIENT));
+        userAccount.setCreatedDate(new Date());
         userRepository.save(userAccount);
+        String subject = "Account Registration Confirmation";
+        String body = "Your account was successfully registered!";
+        this.emailService.sendEmail(subject, body, userCreateDTO.getEmail());
         return userAccount;
     }
 

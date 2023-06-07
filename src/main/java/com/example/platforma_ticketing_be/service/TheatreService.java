@@ -60,7 +60,7 @@ public class TheatreService {
     }
 
     public List<TheatreDto> getAllTheatre(){
-        List<Theatre> theatres = theatreRepository.findAll();
+        List<Theatre> theatres = theatreRepository.getAllOrderedTheatres();
         return theatres.stream().map(theatre -> this.modelMapper.map(theatre, TheatreDto.class)).collect(Collectors.toList());
     }
 
@@ -110,7 +110,7 @@ public class TheatreService {
     }
 
     public List<TheatreDto> getTheatresByLocation(String location){
-        return this.theatreRepository.getDistinctByLocation(location).stream()
+        return this.theatreRepository.getDistinctByLocationOrderByName(location).stream()
                 .map(theatre -> this.modelMapper.map(theatre, TheatreDto.class))
                 .collect(Collectors.toList());
     }

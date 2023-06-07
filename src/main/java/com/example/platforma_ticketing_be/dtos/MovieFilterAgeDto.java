@@ -2,6 +2,8 @@ package com.example.platforma_ticketing_be.dtos;
 
 import lombok.*;
 
+import java.util.Date;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -10,4 +12,5 @@ import lombok.*;
 public class MovieFilterAgeDto {
     private MovieFilterDto movieFilter;
     private int age;
+    private Date createdDate;
 }

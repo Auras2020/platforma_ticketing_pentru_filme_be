@@ -7,10 +7,10 @@ import lombok.ToString;
 import javax.persistence.*;
 import java.util.Date;
 
-@Entity
 @Getter
 @Setter
 @ToString
+@Entity(name = "show_schedule")
 public class ShowTiming {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

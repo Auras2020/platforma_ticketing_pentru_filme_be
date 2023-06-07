@@ -50,7 +50,7 @@ public class MovieService {
     }
 
     public List<MovieDto> getAllMovies(){
-        List<Movie> movies = movieRepository.findAll();
+        List<Movie> movies = movieRepository.getAllOrderedMovies();
         return movies.stream().map(movie -> this.modelMapper.map(movie, MovieDto.class)).collect(Collectors.toList());
     }
 
@@ -90,7 +90,6 @@ public class MovieService {
     }
 
     private void updateMovieGenre(MovieDto movieDto, Movie movie) {
-        System.out.println(movieDto.getGenres());
         deleteMovieGenre(movie.getId());
         for (GenreDto genreDto : movieDto.getGenres()) {
             Genre genre = new Genre(genreDto.getId(), genreDto.getName());
@@ -234,7 +233,7 @@ public class MovieService {
     public List<MovieDto> getAllMoviesCurrentlyRunning(MovieFilterDto movieFilterDto){
         Specification<Movie> specification = this.movieSpecification.getMovies(movieFilterDto);
         Set<Movie> movies = this.showTimingRepository.findAll().stream()
-                .filter(showTiming -> moviesCurrentlyRunning(showTiming.getStartDate(), showTiming.getEndDate()) /*showTiming.getEndDate().getDate() < new Date().getDate() + 7 && showTiming.getEndDate().getDate() >= new Date().getDate()*/)
+                .filter(showTiming -> moviesCurrentlyRunning(showTiming.getStartDate(), showTiming.getEndDate()))
                 .map(ShowTiming::getMovie)
                 .collect(Collectors.toSet());
         List<Movie> filteredMovies = filterMovies(movies, specification);
@@ -253,7 +252,7 @@ public class MovieService {
     public List<MovieDto> getAllMoviesRunningSoon(MovieFilterDto movieFilterDto){
         Specification<Movie> specification = this.movieSpecification.getMovies(movieFilterDto);
         Set<Movie> movies = this.showTimingRepository.findAll().stream()
-                .filter(showTiming -> moviesRunningSoon(showTiming.getStartDate())/*showTiming.getStartDate().getDate() >= new Date().getDate() + 7*/)
+                .filter(showTiming -> moviesRunningSoon(showTiming.getStartDate()))
                 .map(ShowTiming::getMovie)
                 .collect(Collectors.toSet());
         List<Movie> filteredMovies = filterMovies(movies, specification);
@@ -269,8 +268,12 @@ public class MovieService {
         return differenceInDays >= 0;
     }
 
-    public List<MovieDto> getRecomendedMovies(MovieFilterDto movieFilterDto, int age){
+    public List<MovieDto> getRecomendedMovies(MovieFilterDto movieFilterDto, int age, Date createdDate){
         String[] categories;
+        LocalDate date1 = LocalDate.now();
+        LocalDate date2 = LocalDate.of(createdDate.getYear() + 1900, createdDate.getMonth() + 1, createdDate.getDate());
+        int differenceInYears = (int) ChronoUnit.YEARS.between(date2, date1);
+        age += differenceInYears;
         if(age < 12){
             categories = new String[]{"AG"};
         } else if(age < 15){
@@ -282,9 +285,8 @@ public class MovieService {
         }
 
         Specification<Movie> specification = this.movieSpecification.getMovies(movieFilterDto);
-        //Set<Movie> movies = this.movieRepository.getAllMoviesWithACertainRecommendedAge(categories);
         Set<Movie> moviesAvailable = this.showTimingRepository.findAll().stream()
-                .filter(showTiming -> moviesAvailable(showTiming.getStartDate())/*showTiming.getStartDate().getDate() >= new Date().getDate() + 7*/)
+                .filter(showTiming -> moviesAvailable(showTiming.getEndDate()))
                 .map(ShowTiming::getMovie)
                 .filter(movie -> Arrays.asList(categories).contains(movie.getRecommendedAge()))
                 .collect(Collectors.toSet());

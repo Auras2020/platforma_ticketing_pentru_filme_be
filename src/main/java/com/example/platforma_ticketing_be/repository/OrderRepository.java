@@ -15,7 +15,7 @@ import java.util.Set;
 public interface OrderRepository extends JpaRepository<Orders, Long>, JpaSpecificationExecutor<Orders> {
 
     @Query("SELECT st, o.ticketStatus, SUM(o.numberProducts), o.productsStatus, o.createdDate " +
-            "FROM ShowTiming st " +
+            "FROM show_schedule st " +
             "INNER JOIN Orders o ON o.showTiming.id = st.id " +
             "WHERE o.user.id = :id " +
             "GROUP BY st, o.createdDate, o.ticketStatus, o.productsStatus " +
@@ -23,7 +23,7 @@ public interface OrderRepository extends JpaRepository<Orders, Long>, JpaSpecifi
     List<Object[]> findOrdersOfAUser(Pageable pageable, Long id);
 
     @Query("SELECT st, o.ticketStatus, SUM(o.numberProducts), o.productsStatus, o.createdDate " +
-            "FROM ShowTiming st " +
+            "FROM show_schedule st " +
             "INNER JOIN Orders o ON o.showTiming.id = st.id " +
             "WHERE o.user.id = :id and o.id in :ids " +
             "GROUP BY st, o.createdDate, o.ticketStatus, o.productsStatus " +

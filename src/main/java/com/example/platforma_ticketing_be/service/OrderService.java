@@ -374,11 +374,12 @@ public class OrderService {
 
         if(dataSourceList.size() == 1){
             this.emailService.processEmailWithAttachments("Thank you for choosing Hot Movies Center platform! " +
-                            "Below you have attachments with booked tickets.",
+                            "Below you have attachments with " + ticketStatus + " tickets.",
                     "Hot Movies Center - Booked Tickets", user.getEmail(), dataSourceList);
         } else if(dataSourceList.size() == 2) {
             this.emailService.processEmailWithAttachments("Thank you for choosing Hot Movies Center platform! " +
-                            "Below you have attachments with booked tickets and booked foods and/or drinks.",
+                            "Below you have attachments with " + ticketStatus + " tickets and " + productStatus +
+                            " foods and/or drinks.",
                     "Hot Movies Center - Booked Tickets And Products", user.getEmail(), dataSourceList);
         }
     }
@@ -477,26 +478,40 @@ public class OrderService {
         List<Orders> orders = this.orderRepository.findOrdersByUserIdAndShowTimingIdAndCreatedDate(
                 ordersDto.getUser().getId(), ordersDto.getShowTiming().getId(), ordersDto.getCreatedDate());
         if(ordersDto.getTicketsStatus() != null) {
+            boolean statusChanged = true;
             for(Orders order: orders) {
+                if(order.getTicketStatus().equals(ordersDto.getTicketsStatus())){
+                    statusChanged = false;
+                    break;
+                }
                 order.setTicketStatus(ordersDto.getTicketsStatus());
                 order.setCreatedDate(getCurrentDate());
                 orderRepository.save(order);
             }
-            if(ordersDto.getTicketsStatus().equals("cancelled")){
-                refreshNumberOfAvailableProductsInTheatre(ordersDto);
+            if(statusChanged){
+                if(ordersDto.getTicketsStatus().equals("cancelled")){
+                    refreshNumberOfAvailableProductsInTheatre(ordersDto);
+                }
+                sendEmailWithTicketsStatus(ordersDto);
             }
-            sendEmailWithTicketsStatus(ordersDto);
         }
         if(ordersDto.getProductsStatus() != null) {
+            boolean statusChanged = true;
             for(Orders order: orders) {
+                if(order.getProductsStatus().equals(ordersDto.getProductsStatus())){
+                    statusChanged = false;
+                    break;
+                }
                 order.setProductsStatus(ordersDto.getProductsStatus());
                 order.setCreatedDate(getCurrentDate());
                 orderRepository.save(order);
             }
-            if(ordersDto.getProductsStatus().equals("cancelled")){
-                refreshNumberOfAvailableProductsInTheatre(ordersDto);
+            if(statusChanged){
+                if(ordersDto.getProductsStatus().equals("cancelled")){
+                    refreshNumberOfAvailableProductsInTheatre(ordersDto);
+                }
+                sendEmailWithBookedproductsStatus(ordersDto);
             }
-            sendEmailWithBookedproductsStatus(ordersDto);
         }
     }
 

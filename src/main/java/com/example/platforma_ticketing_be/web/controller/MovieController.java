@@ -103,7 +103,7 @@ public class MovieController {
 
     @PostMapping("/age")
     public List<MovieDto> getRecomendedMovies(@RequestBody MovieFilterAgeDto movieFilterAgeDto){
-        return this.movieService.getRecomendedMovies(movieFilterAgeDto.getMovieFilter(), movieFilterAgeDto.getAge());
+        return this.movieService.getRecomendedMovies(movieFilterAgeDto.getMovieFilter(), movieFilterAgeDto.getAge(), movieFilterAgeDto.getCreatedDate());
     }
 
     @GetMapping("/genres/{id}")

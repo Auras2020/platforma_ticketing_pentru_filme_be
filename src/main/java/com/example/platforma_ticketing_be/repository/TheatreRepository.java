@@ -14,5 +14,8 @@ public interface TheatreRepository extends JpaRepository<Theatre, Long>, JpaSpec
     @Query("select distinct t.location from Theatre t")
     List<String> getAllTheatresLocations();
 
-    List<Theatre> getDistinctByLocation(String location);
+    List<Theatre> getDistinctByLocationOrderByName(String location);
+
+    @Query("SELECT t FROM Theatre t ORDER BY t.location, t.name")
+    List<Theatre> getAllOrderedTheatres();
 }
