@@ -30,8 +30,8 @@ public interface OrderRepository extends JpaRepository<Orders, Long>, JpaSpecifi
             "ORDER BY st.day desc, st.time desc")
     List<Object[]> findFilteredOrdersOfAUser(Pageable pageable, Long id, Set<Long> ids);
 
-    @Query("SELECT o FROM Orders o WHERE o.showTiming.id = ?1 AND o.ticketsPrice > 0")
-    Orders findOrderByShowTiming(Long showTimingId);
+    @Query("SELECT o FROM Orders o WHERE o.showTiming.id = ?1 AND o.ticketsPrice > 0 AND o.createdDate = ?2")
+    Orders findOrderByShowTiming(Long showTimingId, Date createdDate);
 
     List<Orders> findOrdersByUserIdAndShowTimingIdAndCreatedDate(Long userId, Long showTimingId, Date date);
 

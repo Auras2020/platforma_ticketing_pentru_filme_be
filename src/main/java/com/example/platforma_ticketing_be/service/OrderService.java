@@ -432,7 +432,7 @@ public class OrderService {
             /*float ticketsPrice = (float) object[5];
             float productsPrice = (float) object[6];*/
             //Orders orders2 = (Orders) object[5];
-            Orders orders2 = this.orderRepository.findOrderByShowTiming(showTiming.getId());
+            Orders orders2 = this.orderRepository.findOrderByShowTiming(showTiming.getId(), date);
             long nrTickets = getTicketsNumber(dto.getUser().getId(), showTiming.getId(), date);
             ordersDtos.add(new OrdersDto(this.modelMapper.map(showTiming, ShowTimingDto.class), dto.getUser(),
                     (int) nrTickets, ticketsStatus, (int) nrProducts, productsStatus,
@@ -463,7 +463,7 @@ public class OrderService {
                 /*float ticketsPrice = (float) object[5];
                 float productsPrice = (float) object[6];*/
                 //Orders orders2 = (Orders) object[5];
-                Orders orders2 = this.orderRepository.findOrderByShowTiming(showTiming.getId());
+                Orders orders2 = this.orderRepository.findOrderByShowTiming(showTiming.getId(), date);
                 long nrTickets = getTicketsNumber(dto.getUser().getId(), showTiming.getId(), date);
                 filteredOrders.add(new OrdersDto(this.modelMapper.map(showTiming, ShowTimingDto.class), dto.getUser(),
                         (int) nrTickets, ticketsStatus, (int) nrProducts, productsStatus,
