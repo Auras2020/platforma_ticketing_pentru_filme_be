@@ -6,8 +6,16 @@ import com.example.platforma_ticketing_be.repository.*;
 import com.example.platforma_ticketing_be.service.email.EmailServiceImpl;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import com.lowagie.text.*;
 import com.lowagie.text.Font;
+import com.lowagie.text.Image;
 import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfWriter;
@@ -18,15 +26,16 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import javax.activation.DataSource;
+import javax.imageio.ImageIO;
 import javax.mail.util.ByteArrayDataSource;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.*;
 import java.awt.*;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
@@ -86,13 +95,37 @@ public class OrderService {
         contentByte.stroke();
     }
 
-    private void displayImage(PdfWriter writer, Document document) throws IOException {
-        com.lowagie.text.Image image = com.lowagie.text.Image.getInstance("classpath:qr.png");
-        float x = 600;
-        float y = lastParagrapghYCoordinate(writer);
-        image.scaleAbsolute(200, 200);
-        image.setAbsolutePosition(x, y);
-        document.add(image);
+    private void displayImage(PdfWriter writer, Document document, String text) {
+        try {
+            QRCodeWriter qrCodeWriter = new QRCodeWriter();
+
+            java.util.Map<EncodeHintType, Object> hints = new java.util.HashMap<>();
+            hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+            hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
+
+            UUID uniqueId = UUID.randomUUID();
+            String uniqueIdString = uniqueId.toString();
+            String encodedJson = "https://www.hotmoviescenter.com/" + uniqueIdString /*+ "/" +
+                    URLEncoder.encode(text, StandardCharsets.UTF_8)*/;
+            BitMatrix bitMatrix = qrCodeWriter.encode(encodedJson, BarcodeFormat.QR_CODE, 200, 200, hints);
+            BufferedImage qrImage = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+
+            for (int x = 0; x < 200; x++) {
+                for (int y = 0; y < 200; y++) {
+                    int pixelColor = bitMatrix.get(x, y) ? 0x000000 : 0xFFFFFF;
+                    qrImage.setRGB(x, y, pixelColor);
+                }
+            }
+
+            Image qrPdfImage = Image.getInstance(qrImage, null);
+            qrPdfImage.scaleToFit(200, 200);
+            float x = 600;
+            float y = lastParagrapghYCoordinate(writer);
+            qrPdfImage.setAbsolutePosition(x, y);
+            document.add(qrPdfImage);
+        } catch (WriterException | IOException | com.lowagie.text.DocumentException e) {
+            e.printStackTrace();
+        }
     }
 
     public InputStreamResource getSeatsPdfContent(ShowTimingDto showTimingDto, List<String> seats,
@@ -125,6 +158,7 @@ public class OrderService {
         PeoplePromotion peoplePromotion = this.peoplePromotionRepository.findPeoplePromotionByShowTimingId(showTimingDto.getId());
 
         for(int i = 0; i < seats.size(); i++){
+            String s = "";
             if(i % 3 == 0 && i != 0){
                 document.newPage();
             }
@@ -138,36 +172,50 @@ public class OrderService {
             SimpleDateFormat sdf = new SimpleDateFormat(pattern);
 
             displayParagraph("Movie name: " + showTimingDto.getMovie().getName(), document, fontUser, 0);
+            s += "Movie name: " + showTimingDto.getMovie().getName() + ", ";
             displayParagraph("Day: " + sdf.format(showTimingDto.getDay()), document, fontUser ,0);
+            s += "Day: " + sdf.format(showTimingDto.getDay()) + ", ";
             displayParagraph("Time: " + daysOfWeek[showTimingDto.getDay().getDay()] + " " + showTimingDto.getTime(), document, fontUser ,0);
+            s += "Time: " + daysOfWeek[showTimingDto.getDay().getDay()] + " " + showTimingDto.getTime() + ", ";
 
             Font font = FontFactory.getFont(FontFactory.TIMES_BOLD);
             font.setSize(14);
 
             displayParagraph("Theatre name: " + showTimingDto.getTheatre().getName(), document, font, 0);
+            s += "Theatre name: " + showTimingDto.getTheatre().getName() + ", ";
             displayParagraph("Venue: " + showTimingDto.getVenue().getVenueNumber(), document, font, 0);
+            s += "Venue: " + showTimingDto.getVenue().getVenueNumber() + ", ";
             if(i < nrAdults){
                 displayParagraph("Category: Adult", document, font, 0);
+                s += "Category: Adult, ";
                 if(peoplePromotion != null){
-                    displayParagraph("Price: " + peoplePromotion.getAdult(), document, font, 0);
+                    displayParagraph("Price: " + peoplePromotion.getAdult() + " RON", document, font, 0);
+                    s += "Price: " + peoplePromotion.getAdult() + " RON, ";
                 } else {
-                    displayParagraph("Price: " + showTimingDto.getPrice(), document, font, 0);
+                    displayParagraph("Price: " + showTimingDto.getPrice() + " RON", document, font, 0);
+                    s += "Price: " + showTimingDto.getPrice() + " RON, ";
                 }
             }
             if(i >= nrAdults && i < nrAdults + nrStudents){
                 displayParagraph("Category: Student", document, font, 0);
+                s += "Category: Student, ";
                 if(peoplePromotion != null){
-                    displayParagraph("Price: " + peoplePromotion.getStudent(), document, font, 0);
+                    displayParagraph("Price: " + peoplePromotion.getStudent() + " RON", document, font, 0);
+                    s += "Price: " + peoplePromotion.getStudent() + " RON, ";
                 } else {
-                    displayParagraph("Price: " + showTimingDto.getPrice(), document, font, 0);
+                    displayParagraph("Price: " + showTimingDto.getPrice() + " RON", document, font, 0);
+                    s += "Price: " + showTimingDto.getPrice() + " RON, ";
                 }
             }
             if(i >= nrAdults + nrStudents && i < nrAdults + nrStudents + nrChilds){
                 displayParagraph("Category: Child", document, font, 0);
+                s += "Category: Child, ";
                 if(peoplePromotion != null){
-                    displayParagraph("Price: " + peoplePromotion.getChild(), document, font, 0);
+                    displayParagraph("Price: " + peoplePromotion.getChild() + " RON", document, font, 0);
+                    s += "Price: " + peoplePromotion.getChild() + " RON, ";
                 } else {
-                    displayParagraph("Price: " + showTimingDto.getPrice(), document, font, 0);
+                    displayParagraph("Price: " + showTimingDto.getPrice() + " RON", document, font, 0);
+                    s += "Price: " + showTimingDto.getPrice() + " RON, ";
                 }
             }
             int i1 = 0;
@@ -184,9 +232,11 @@ public class OrderService {
             }
 
             displayParagraph("Row: " + i1, document, font, 0);
+            s += "Row: " + i1 + ", ";
             displayParagraph("Column: " + j1, document, font, 0);
+            s += "Column: " + j1;
 
-            displayImage(writer, document);
+            displayImage(writer, document, s);
 
             displayParagraph("\n", document, fontTitle, 0);
             displayOrangeLine(writer, document);
@@ -239,6 +289,7 @@ public class OrderService {
         fontTitle.setSize(16);
 
         for(int i = 0; i < productDetails.size(); i++){
+            String s = "";
             if(i % 4 == 0 && i != 0){
                 document.newPage();
             }
@@ -252,21 +303,30 @@ public class OrderService {
             SimpleDateFormat sdf = new SimpleDateFormat(pattern);
 
             displayParagraph("Movie name: " + showTimingDto.getMovie().getName(), document, fontUser, 0);
+            s += "Movie name: " + showTimingDto.getMovie().getName() + ", ";
             displayParagraph("Day: " + sdf.format(showTimingDto.getDay()), document, fontUser ,0);
+            s += "Day: " + sdf.format(showTimingDto.getDay()) + ", ";
             displayParagraph("Time: " + daysOfWeek[showTimingDto.getDay().getDay()] + " " + showTimingDto.getTime(), document, fontUser ,0);
+            s += "Time: " + daysOfWeek[showTimingDto.getDay().getDay()] + " " + showTimingDto.getTime() + ", ";
 
             Font font = FontFactory.getFont(FontFactory.TIMES_BOLD);
             font.setSize(14);
 
             displayParagraph("Theatre name: " + showTimingDto.getTheatre().getName(), document, font, 0);
+            s += "Theatre name: " + showTimingDto.getTheatre().getName() + ", ";
             displayParagraph("Venue: " + showTimingDto.getVenue().getVenueNumber(), document, font, 0);
+            s += "Venue: " + showTimingDto.getVenue().getVenueNumber() + ", ";
 
             displayParagraph("Name: " + productDetails.get(i).getName(), document, font, 0);
+            s += "Name: " + productDetails.get(i).getName() + ", ";
             displayParagraph("Price: " + productDetails.get(i).getPrice() + " RON", document, font, 0);
+            s += "Price: " + productDetails.get(i).getPrice() + " RON, ";
             displayParagraph("Quantity: " + productDetails.get(i).getQuantity() + "g", document, font, 0);
+            s += "Quantity: " + productDetails.get(i).getQuantity() + "g, ";
             displayParagraph("Number: " + productDetails.get(i).getNumber(), document, font, 0);
+            s += "Number: " + productDetails.get(i).getNumber();
 
-            displayImage(writer, document);
+            displayImage(writer, document, s);
 
             displayParagraph("\n", document, fontTitle, 0);
             displayOrangeLine(writer, document);
@@ -429,9 +489,6 @@ public class OrderService {
             long nrProducts = (long) object[2];
             String productsStatus = (String) object[3];
             Date date = (Date) object[4];
-            /*float ticketsPrice = (float) object[5];
-            float productsPrice = (float) object[6];*/
-            //Orders orders2 = (Orders) object[5];
             Orders orders2 = this.orderRepository.findOrderByShowTiming(showTiming.getId(), date);
             long nrTickets = getTicketsNumber(dto.getUser().getId(), showTiming.getId(), date);
             ordersDtos.add(new OrdersDto(this.modelMapper.map(showTiming, ShowTimingDto.class), dto.getUser(),
@@ -460,9 +517,6 @@ public class OrderService {
                 long nrProducts = (long) object[2];
                 String productsStatus = (String) object[3];
                 Date date = (Date) object[4];
-                /*float ticketsPrice = (float) object[5];
-                float productsPrice = (float) object[6];*/
-                //Orders orders2 = (Orders) object[5];
                 Orders orders2 = this.orderRepository.findOrderByShowTiming(showTiming.getId(), date);
                 long nrTickets = getTicketsNumber(dto.getUser().getId(), showTiming.getId(), date);
                 filteredOrders.add(new OrdersDto(this.modelMapper.map(showTiming, ShowTimingDto.class), dto.getUser(),
@@ -479,7 +533,9 @@ public class OrderService {
                 ordersDto.getUser().getId(), ordersDto.getShowTiming().getId(), ordersDto.getCreatedDate());
         if(ordersDto.getTicketsStatus() != null) {
             boolean statusChanged = true;
+            String status = "";
             for(Orders order: orders) {
+                status = order.getTicketStatus();
                 if(order.getTicketStatus().equals(ordersDto.getTicketsStatus())){
                     statusChanged = false;
                     break;
@@ -492,12 +548,14 @@ public class OrderService {
                 if(ordersDto.getTicketsStatus().equals("cancelled")){
                     refreshNumberOfAvailableProductsInTheatre(ordersDto);
                 }
-                sendEmailWithTicketsStatus(ordersDto);
+                sendEmailWithTicketsStatus(ordersDto, ordersDto.getTicketsStatus(), status);
             }
         }
         if(ordersDto.getProductsStatus() != null) {
             boolean statusChanged = true;
+            String status = "";
             for(Orders order: orders) {
+                status = order.getProductsStatus();
                 if(order.getProductsStatus().equals(ordersDto.getProductsStatus())){
                     statusChanged = false;
                     break;
@@ -510,7 +568,7 @@ public class OrderService {
                 if(ordersDto.getProductsStatus().equals("cancelled")){
                     refreshNumberOfAvailableProductsInTheatre(ordersDto);
                 }
-                sendEmailWithBookedproductsStatus(ordersDto);
+                sendEmailWithBookedproductsStatus(ordersDto, ordersDto.getProductsStatus(), status);
             }
         }
     }
@@ -559,21 +617,23 @@ public class OrderService {
         return sdf.format(date);
     }
 
-    private void sendEmailWithTicketsStatus(OrdersDto ordersDto){
+    private void sendEmailWithTicketsStatus(OrdersDto ordersDto, String newStatus, String oldStatus){
         String subject = "Hot Movies Center - " + ordersDto.getTicketsStatus().substring(0, 1).toUpperCase() + ordersDto.getTicketsStatus().substring(1) + " Tickets";
         String body = "Your tickets for movie " + ordersDto.getShowTiming().getMovie().getName() +
                 " at theatre " + ordersDto.getShowTiming().getTheatre().getName() + " on date of " +
                 changeDateFormat(ordersDto.getShowTiming().getDay()) + " " +
-                ordersDto.getShowTiming().getTime() + " were " + ordersDto.getTicketsStatus();
+                ordersDto.getShowTiming().getTime() + " were " + ordersDto.getTicketsStatus() +
+                (newStatus.equals("cancelled") && oldStatus.equals("bought") ? ". You will receive your money soon." : "");
         this.emailService.sendEmail(subject, body, ordersDto.getUser().getEmail());
     }
 
-    private void sendEmailWithBookedproductsStatus(OrdersDto ordersDto){
+    private void sendEmailWithBookedproductsStatus(OrdersDto ordersDto, String newStatus, String oldStatus){
         String subject = "Hot Movies Center - " + ordersDto.getProductsStatus().substring(0, 1).toUpperCase() + ordersDto.getProductsStatus().substring(1) + " Products";
         String body = "Your products for movie " + ordersDto.getShowTiming().getMovie().getName() +
                 " at theatre " + ordersDto.getShowTiming().getTheatre().getName() + " on date of " +
                 changeDateFormat(ordersDto.getShowTiming().getDay()) + " " +
-                ordersDto.getShowTiming().getTime() + " were " + ordersDto.getProductsStatus();
+                ordersDto.getShowTiming().getTime() + " were " + ordersDto.getProductsStatus() +
+                (newStatus.equals("cancelled") && oldStatus.equals("bought") ? ". You will receive your money soon." : "");
         this.emailService.sendEmail(subject, body, ordersDto.getUser().getEmail());
     }
 

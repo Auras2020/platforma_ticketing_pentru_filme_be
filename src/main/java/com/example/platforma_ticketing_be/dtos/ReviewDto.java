@@ -20,4 +20,5 @@ public class ReviewDto {
     private Date createdDate;
     private UserAccount user;
     private MovieDto movie;
+    private boolean anonymous;
 }

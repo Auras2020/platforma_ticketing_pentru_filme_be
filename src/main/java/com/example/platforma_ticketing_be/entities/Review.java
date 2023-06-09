@@ -37,4 +37,7 @@ public class Review {
     @ManyToOne
     @JoinColumn(name="movie_id", nullable=false)
     private Movie movie;
+
+    @JoinColumn(name="anonymous", nullable=false)
+    private boolean anonymous;
 }

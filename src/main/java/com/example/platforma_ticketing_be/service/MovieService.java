@@ -81,7 +81,7 @@ public class MovieService {
             Genre genre = new Genre(genreDto.getId(), genreDto.getName());
             Movie createdMovie = this.movieRepository.findById(movie.getId()).get();
             MovieGenres movieGenres = new MovieGenres(createdMovie, genre);
-            entityManager.persist(movieGenres);
+            this.movieGenreRepository.save(movieGenres);
         }
     }
 
@@ -95,38 +95,48 @@ public class MovieService {
             Genre genre = new Genre(genreDto.getId(), genreDto.getName());
             MovieGenres movieGenres = new MovieGenres(movie, genre);
             if (!this.movieGenreRepository.findAll().contains(movieGenres)) {
-                entityManager.persist(movieGenres);
+                this.movieGenreRepository.save(movieGenres);
             }
         }
     }
 
-    public Movie create(MultipartFile posterFile, String trailerFile, MovieDto movieDto) throws IOException {
+    public void create(MultipartFile posterFile, String trailerFile, MovieDto movieDto) throws IOException {
         Movie movie;
         if (movieDto.getId() != null) {
             if (this.movieRepository.findById(movieDto.getId()).isPresent()) {
                 movie = this.movieRepository.findById(movieDto.getId()).get();
-                updateMovieGenre(movieDto, movie);
+                if (trailerFile != null) {
+                    movie.setTrailerName(trailerFile);
+                }
                 if (this.checkIfUploadedFileIsOfImageType(posterFile)) {
-                    movieDto.setPoster(posterFile.getBytes());
-                    movieDto.setPosterName(posterFile.getOriginalFilename());
-                } else if (posterFile.isEmpty()) {
+                    movie.setPoster(posterFile.getBytes());
+                    movie.setPosterName(posterFile.getOriginalFilename());
+                } /*else if (posterFile.isEmpty()) {
                     movieDto.setPoster(movie.getPoster());
                     movieDto.setPosterName(movie.getPosterName());
-                }
+                }*/
+                //movie = this.modelMapper.map(movieDto, Movie.class);
+                movieRepository.save(movie);
+                updateMovieGenre(movieDto, movie);
             }
         } else {
             if (this.checkIfUploadedFileIsOfImageType(posterFile)) {
                 movieDto.setPoster(posterFile.getBytes());
                 movieDto.setPosterName(posterFile.getOriginalFilename());
             }
+            if (trailerFile != null) {
+                movieDto.setTrailerName(trailerFile);
+            }
+            movie = this.modelMapper.map(movieDto, Movie.class);
+            Movie createdMovie = movieRepository.save(movie);
+            createMovieGenre(movieDto, createdMovie);
         }
-        if (trailerFile != null) {
-            movieDto.setTrailerName(trailerFile);
-        }
-        movie = this.modelMapper.map(movieDto, Movie.class);
-        Movie createdMovie = movieRepository.save(movie);
-        createMovieGenre(movieDto, createdMovie);
-        return movie;
+
+        //movie = this.modelMapper.map(movieDto, Movie.class);
+        //System.out.println(movie);
+        /*Movie createdMovie = *//*movieRepository.save(movie)*/;
+        //createMovieGenre(movieDto, createdMovie);
+        //return movie;
     }
 
     public void delete(Long id){
@@ -308,7 +318,7 @@ public class MovieService {
     }
 
     public List<GenreDto> getAllGenres(){
-        return this.genreRepository.findAll().stream()
+        return this.genreRepository.getAllOrderedGenres().stream()
                 .map(genre -> this.modelMapper.map(genre, GenreDto.class))
                 .collect(Collectors.toList());
     }

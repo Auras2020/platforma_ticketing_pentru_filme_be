@@ -61,8 +61,8 @@ public class MovieController {
     }
 
     @PutMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public Movie create(@RequestPart("photo") MultipartFile posterFile, @RequestPart("trailer") String trailerFile, @RequestPart("movie") MovieDto movieDto) throws IOException {
-        return this.movieService.create(posterFile, trailerFile, movieDto);
+    public void create(@RequestPart("photo") MultipartFile posterFile, @RequestPart("trailer") String trailerFile, @RequestPart("movie") MovieDto movieDto) throws IOException {
+        this.movieService.create(posterFile, trailerFile, movieDto);
     }
 
     @DeleteMapping(value = "/{id}")
