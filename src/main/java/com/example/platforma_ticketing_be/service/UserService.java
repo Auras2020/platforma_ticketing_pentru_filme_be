@@ -41,11 +41,19 @@ public class UserService {
 
     public UserAccount create(UserCreateDTO userCreateDTO){
         UserAccount userAccount = this.modelMapper.map(userCreateDTO, UserAccount.class);
-        userAccount.setRole(String.valueOf(UserRole.CLIENT));
         userAccount.setCreatedDate(new Date());
         userRepository.save(userAccount);
-        String subject = "Account Registration Confirmation";
-        String body = "Your account was successfully registered!";
+        String subject = "";
+        String body = "";
+        if(userAccount.getRole().equals("CLIENT")){
+            subject = "Account Registration Confirmation";
+            body = "Your account was successfully registered!";
+        } else {
+            subject = "Account Registration Confirmation";
+            body = "Your account was successfully registered! " +
+                    "You will receive a confirmation mail when your request to login into application will be approved.";
+        }
+
         this.emailService.sendEmail(subject, body, userCreateDTO.getEmail());
         return userAccount;
     }

@@ -83,8 +83,4 @@ public class AuthentificationService {
     public UserAccount checkIfEmailExists(String email){
         return this.userRepository.findByEmail(email);
     }
-
-    /*private boolean checkCredentials(String userEmail, String userPass) {
-        return email.equals(userEmail) && password.equals(userPass);
-    }*/
 }

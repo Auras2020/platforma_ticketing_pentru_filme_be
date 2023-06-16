@@ -38,4 +38,8 @@ public class UserAccount {
     @Column(name = "created_date", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
+
+    @ManyToOne
+    @JoinColumn(name="theatre_id")
+    private Theatre theatre;
 }
