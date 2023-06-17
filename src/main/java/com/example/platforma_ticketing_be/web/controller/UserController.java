@@ -1,9 +1,6 @@
 package com.example.platforma_ticketing_be.web.controller;
 
-import com.example.platforma_ticketing_be.dtos.DashboardDto;
-import com.example.platforma_ticketing_be.dtos.UserCreateDTO;
-import com.example.platforma_ticketing_be.dtos.UserPageDto;
-import com.example.platforma_ticketing_be.dtos.UserPageResponseDto;
+import com.example.platforma_ticketing_be.dtos.*;
 import com.example.platforma_ticketing_be.entities.UserAccount;
 import com.example.platforma_ticketing_be.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +50,11 @@ public class UserController {
     @GetMapping("/dashboard")
     public DashboardDto getCurrentInfo(){
         return this.userService.getCurrentInfo();
+    }
+
+    @GetMapping("/theatre-manager/dashboard/{id}")
+    public TheatreManagerDashboardDto getCurrentInfoTheatreManager(@PathVariable("id") Long theatreId){
+        return this.userService.getCurrentInfoTheatreManager(theatreId);
     }
 
     @GetMapping("/{email}")

@@ -81,4 +81,19 @@ public class OrderController {
     public List<ProductsNrDto> getProductsNumber(){
         return this.orderService.getProductsNumber();
     }
+
+    @GetMapping("/tickets-number-chart/{id}")
+    public List<TicketsNrDto> getTicketsNumberFromGivenTheatre(@PathVariable("id") Long id){
+        return this.orderService.getTicketsNumberFromGivenTheatre(id);
+    }
+
+    @GetMapping("/tickets-price-chart/{id}")
+    public List<TicketsPriceDto> getTicketsPriceFromGivenTheatre(@PathVariable("id") Long id){
+        return this.orderService.getTicketsPriceFromGivenTheatre(id);
+    }
+
+    @GetMapping("/products-number-chart/{id}")
+    public List<ProductsNrDto> getProductsNumberFromGivenTheatre(@PathVariable("id") Long id){
+        return this.orderService.getProductsNumberFromGivenTheatre(id);
+    }
 }

@@ -11,10 +11,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,6 +27,8 @@ public class ShowTimingService {
     private final ShowTimingRepository showTimingRepository;
     private final ModelMapper modelMapper;
     private final ShowTimingSpecificationImpl showTimingSpecification;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public ShowTimingService(ShowTimingRepository showTimingRepository, ModelMapper modelMapper, ShowTimingSpecificationImpl showTimingSpecification) {
         this.showTimingRepository = showTimingRepository;
@@ -78,5 +84,58 @@ public class ShowTimingService {
             return this.modelMapper.map(this.showTimingRepository.findById(id).get(), ShowTimingDto.class);
         }
         return null;
+    }
+
+    public Set<Long> filterShowTimings(List<ShowTiming> showTimings, Specification<ShowTiming> specification) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<ShowTiming> query = builder.createQuery(ShowTiming.class);
+        Root<ShowTiming> root = query.from(ShowTiming.class);
+
+        Predicate predicate = specification.toPredicate(root, query, builder);
+        query.where(predicate);
+
+        Set<Long> filteredShowTimings = new HashSet<>();
+        for (ShowTiming showTiming: showTimings) {
+            Predicate showTimingPredicate = builder.and(predicate, builder.equal(root, showTiming));
+            query.where(showTimingPredicate);
+
+            List<ShowTiming> result = entityManager.createQuery(query).getResultList();
+            if (!result.isEmpty()) {
+                filteredShowTimings.add(showTiming.getId());
+            }
+        }
+
+        return filteredShowTimings;
+    }
+
+    public ShowTimingPResponseDto getAllShowTimingsFromATheatre(TheatrePDto dto){
+        List<ShowTiming> showTimings = this.showTimingRepository.getAllShowTimingsFromAGivenTheatre(PageRequest.of(dto.getPage(), dto.getSize()),
+                dto.getTheatreId());
+        List<ShowTimingDto> showTimingDtos = showTimings.stream()
+                .map(showTiming -> this.modelMapper.map(showTiming, ShowTimingDto.class))
+                .toList();
+
+        int totalShowTimings = 0;
+        if(this.showTimingRepository.findAll().size() > 0){
+            totalShowTimings = this.showTimingRepository.getAllShowTimingsFromAGivenTheatre(PageRequest.of(0, this.showTimingRepository.findAll().size()), dto.getTheatreId()).size();
+        }
+
+        return new ShowTimingPResponseDto(showTimingDtos, totalShowTimings);
+    }
+
+    public ShowTimingPResponseDto getAllFilteredShowTimingsFromATheatre(ShowTimingFilterDto showTimingFilterDto, TheatrePDto dto){
+        Specification<ShowTiming> specification = this.showTimingSpecification.getShowTimings(showTimingFilterDto);
+        Set<Long> filteredShowTimings = filterShowTimings(this.showTimingRepository.findAll(), specification);
+        int totalShowTimings = 0;
+        List<ShowTimingDto> showTimingDtos = new ArrayList<>();
+        if(this.showTimingRepository.findAll().size() > 0){
+            Set<ShowTiming> showTimings = new HashSet<>(this.showTimingRepository.getAllFilteredShowTimingsFromAGivenTheatre(PageRequest.of(dto.getPage(), dto.getSize()),
+                    dto.getTheatreId(), filteredShowTimings));
+            showTimingDtos = showTimings.stream()
+                    .map(showTiming -> this.modelMapper.map(showTiming, ShowTimingDto.class))
+                    .toList();
+            totalShowTimings = this.showTimingRepository.getAllFilteredShowTimingsFromAGivenTheatre(PageRequest.of(0, this.showTimingRepository.findAll().size()), dto.getTheatreId(), filteredShowTimings).size();
+        }
+        return new ShowTimingPResponseDto(showTimingDtos, totalShowTimings);
     }
 }

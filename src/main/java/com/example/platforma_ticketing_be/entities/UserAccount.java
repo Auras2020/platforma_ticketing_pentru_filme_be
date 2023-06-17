@@ -42,4 +42,7 @@ public class UserAccount {
     @ManyToOne
     @JoinColumn(name="theatre_id")
     private Theatre theatre;
+
+    @Column(name = "pending", nullable = false)
+    private boolean pending;
 }

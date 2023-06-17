@@ -96,6 +96,16 @@ public class MovieController {
         return this.movieService.getAllMoviesCurrentlyRunning(movieFilterDto);
     }
 
+    @PostMapping("/theatre-manager/movies")
+    public MoviePResponseDto getAllFilteredMoviesFromATheatre(@RequestBody TheatrePDto theatrePDto){
+        return this.movieService.getAllMoviesFromATheatre(theatrePDto);
+    }
+
+    @PostMapping("/theatre-manager/movies/filtered")
+    public MoviePResponseDto getAllFilteredMoviesFromATheatre(@RequestBody TheatreManagerMoviesDto theatreManagerMoviesDto){
+        return this.movieService.getAllFilteredMoviesFromATheatre(theatreManagerMoviesDto.getMovieFilterDto(), theatreManagerMoviesDto.getTheatreDto());
+    }
+
     @PostMapping("/soon-running")
     public List<MovieDto> getAllMoviesRunningSoon(@RequestBody MovieFilterDto movieFilterDto){
         return this.movieService.getAllMoviesRunningSoon(movieFilterDto);

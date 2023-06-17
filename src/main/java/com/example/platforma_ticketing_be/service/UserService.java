@@ -2,7 +2,6 @@ package com.example.platforma_ticketing_be.service;
 
 import com.example.platforma_ticketing_be.dtos.*;
 import com.example.platforma_ticketing_be.entities.UserAccount;
-import com.example.platforma_ticketing_be.entities.UserRole;
 import com.example.platforma_ticketing_be.repository.*;
 import com.example.platforma_ticketing_be.service.email.EmailServiceImpl;
 import org.modelmapper.ModelMapper;
@@ -27,8 +26,10 @@ public class UserService {
     private final ReviewRepository reviewRepository;
     private final MovieRepository movieRepository;
     private final EmailServiceImpl emailService;
+    private final ShowTimingRepository showTimingRepository;
+    private final VenueRepository venueRepository;
 
-    public UserService(UserRepository userRepository, ModelMapper modelMapper, UserSpecificationImpl userSpecification, TheatreRepository theatreRepository, OrderRepository orderRepository, ReviewRepository reviewRepository, MovieRepository movieRepository, EmailServiceImpl emailService) {
+    public UserService(UserRepository userRepository, ModelMapper modelMapper, UserSpecificationImpl userSpecification, TheatreRepository theatreRepository, OrderRepository orderRepository, ReviewRepository reviewRepository, MovieRepository movieRepository, EmailServiceImpl emailService, ShowTimingRepository showTimingRepository, VenueRepository venueRepository) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
         this.userSpecification = userSpecification;
@@ -37,6 +38,8 @@ public class UserService {
         this.reviewRepository = reviewRepository;
         this.movieRepository = movieRepository;
         this.emailService = emailService;
+        this.showTimingRepository = showTimingRepository;
+        this.venueRepository = venueRepository;
     }
 
     public UserAccount create(UserCreateDTO userCreateDTO){
@@ -98,6 +101,16 @@ public class UserService {
         int products = this.orderRepository.getNumberOfProductsSold() == null ? 0 : this.orderRepository.getNumberOfProductsSold();
         int reviews = this.reviewRepository.getNumberOfReviews();
         return new DashboardDto(theatres, movies, users, tickets, products, reviews);
+    }
+
+    public TheatreManagerDashboardDto getCurrentInfoTheatreManager(Long theatreId){
+        int movies = this.showTimingRepository.countMoviesFromATheatre(theatreId);
+        int venues = this.venueRepository.getVenuesNumberFromTheatre(theatreId);
+        int tickets = this.orderRepository.getNumberOfTicketsSoldFromATheatre(theatreId);
+        int products = this.orderRepository.getNumberOfProductsSoldFromATheatre(theatreId) == null
+                ? 0
+                : this.orderRepository.getNumberOfProductsSoldFromATheatre(theatreId);
+        return new TheatreManagerDashboardDto(movies, venues, tickets, products);
     }
 
     public UserAccount findByEmail(String email){

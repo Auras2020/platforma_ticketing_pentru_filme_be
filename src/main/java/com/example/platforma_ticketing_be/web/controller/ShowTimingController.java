@@ -48,4 +48,14 @@ public class ShowTimingController {
     public void delete(@PathVariable("id") Long id){
         this.showTimingService.delete(id);
     }
+
+    @PostMapping("/theatre-manager/show-timings")
+    public ShowTimingPResponseDto getAllFilteredMoviesFromATheatre(@RequestBody TheatrePDto theatrePDto){
+        return this.showTimingService.getAllShowTimingsFromATheatre(theatrePDto);
+    }
+
+    @PostMapping("/theatre-manager/show-timings/filtered")
+    public ShowTimingPResponseDto getAllFilteredMoviesFromATheatre(@RequestBody TheatreManagerShowTimingsDto theatreManagerShowTimingsDto){
+        return this.showTimingService.getAllFilteredShowTimingsFromATheatre(theatreManagerShowTimingsDto.getShowTimingFilterDto(), theatreManagerShowTimingsDto.getTheatreDto());
+    }
 }

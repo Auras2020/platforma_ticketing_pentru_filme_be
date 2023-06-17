@@ -14,4 +14,5 @@ public class UserCreateDTO {
     private String password;
     private String role;
     private TheatreDto theatre;
+    private boolean pending;
 }

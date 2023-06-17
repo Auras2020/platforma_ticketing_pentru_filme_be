@@ -665,6 +665,18 @@ public class OrderService {
         return ticketsNrDtos;
     }
 
+    public List<TicketsNrDto> getTicketsNumberFromGivenTheatre(Long theatreId){
+        List<TicketsNrDto> ticketsNrDtos = new ArrayList<>();
+        List<Object[]> results = this.orderRepository.findNumberOfTicketsPerMovieFromGivenTheatre(theatreId);
+        List<Object[]> objects = results.subList(0, Math.min(results.size(), 4));
+        for(Object[] object: objects){
+            String movie = (String) object[0];
+            long nr = (long) object[1];
+            ticketsNrDtos.add(new TicketsNrDto(movie, (int) nr));
+        }
+        return ticketsNrDtos;
+    }
+
     public List<TicketsPriceDto> getTicketsPrice(){
         List<TicketsPriceDto> ticketsPriceDtos = new ArrayList<>();
         List<Object[]> results = this.orderRepository.findPriceOfTicketsPerMovie();
@@ -677,9 +689,32 @@ public class OrderService {
         return ticketsPriceDtos;
     }
 
+    public List<TicketsPriceDto> getTicketsPriceFromGivenTheatre(Long theatreId){
+        List<TicketsPriceDto> ticketsPriceDtos = new ArrayList<>();
+        List<Object[]> results = this.orderRepository.findPriceOfTicketsPerMovieFromGivenTheatre(theatreId);
+        List<Object[]> objects = results.subList(0, Math.min(results.size(), 4));
+        for(Object[] object: objects){
+            String movie = (String) object[0];
+            double price = (double) object[1];
+            ticketsPriceDtos.add(new TicketsPriceDto(movie, price));
+        }
+        return ticketsPriceDtos;
+    }
+
     public List<ProductsNrDto> getProductsNumber(){
         List<ProductsNrDto> productsNrDtos = new ArrayList<>();
         List<Object[]> objects = this.orderRepository.findNumberOfProductsSold();
+        for(Object[] object: objects){
+            String movie = (String) object[0];
+            long nr = (long) object[1];
+            productsNrDtos.add(new ProductsNrDto(movie, (int) nr));
+        }
+        return productsNrDtos;
+    }
+
+    public List<ProductsNrDto> getProductsNumberFromGivenTheatre(Long theatreId){
+        List<ProductsNrDto> productsNrDtos = new ArrayList<>();
+        List<Object[]> objects = this.orderRepository.findNumberOfProductsSoldFromGivenTheatre(theatreId);
         for(Object[] object: objects){
             String movie = (String) object[0];
             long nr = (long) object[1];

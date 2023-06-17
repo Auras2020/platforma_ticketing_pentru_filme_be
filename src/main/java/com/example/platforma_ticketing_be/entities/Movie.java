@@ -53,6 +53,6 @@ public class Movie {
     @Column(name = "trailer_name")
     private String trailerName;
 
-    /*@OneToMany(mappedBy = "movie", cascade = CascadeType.ALL)
-    private Set<MovieGenres> movieGenres;*/
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL)
+    private Set<MovieGenres> movieGenres;
 }

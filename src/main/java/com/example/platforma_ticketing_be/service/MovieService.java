@@ -76,13 +76,14 @@ public class MovieService {
         return getMoviePageResponse(pageOfMovies);
     }
 
-    private void createMovieGenre(MovieDto movieDto, Movie movie) {
+    private Set<MovieGenres> createMovieGenre(MovieDto movieDto, Movie movie) {
+        Set<MovieGenres> movieGenresSet = new HashSet<>();
         for (GenreDto genreDto : movieDto.getGenres()) {
             Genre genre = new Genre(genreDto.getId(), genreDto.getName());
-            Movie createdMovie = this.movieRepository.findById(movie.getId()).get();
-            MovieGenres movieGenres = new MovieGenres(createdMovie, genre);
-            this.movieGenreRepository.save(movieGenres);
+            MovieGenres movieGenres = new MovieGenres(movie, genre);
+            movieGenresSet.add(movieGenres);
         }
+        return movieGenresSet;
     }
 
     private void deleteMovieGenre(Long movieId) {
@@ -100,22 +101,29 @@ public class MovieService {
         }
     }
 
+    private void setMovieFields(Movie movie, MovieDto movieDto){
+        movie.setName(movieDto.getName());
+        movie.setDuration(movieDto.getDuration());
+        movie.setNote(movieDto.getNote());
+        movie.setRating(movieDto.getRating());
+        movie.setActors(movieDto.getActors());
+        movie.setDirector(movieDto.getDirector());
+        movie.setSynopsis(movieDto.getSynopsis());
+    }
+
     public void create(MultipartFile posterFile, String trailerFile, MovieDto movieDto) throws IOException {
         Movie movie;
         if (movieDto.getId() != null) {
             if (this.movieRepository.findById(movieDto.getId()).isPresent()) {
                 movie = this.movieRepository.findById(movieDto.getId()).get();
+                setMovieFields(movie, movieDto);
                 if (trailerFile != null) {
                     movie.setTrailerName(trailerFile);
                 }
                 if (this.checkIfUploadedFileIsOfImageType(posterFile)) {
                     movie.setPoster(posterFile.getBytes());
                     movie.setPosterName(posterFile.getOriginalFilename());
-                } /*else if (posterFile.isEmpty()) {
-                    movieDto.setPoster(movie.getPoster());
-                    movieDto.setPosterName(movie.getPosterName());
-                }*/
-                //movie = this.modelMapper.map(movieDto, Movie.class);
+                }
                 movieRepository.save(movie);
                 updateMovieGenre(movieDto, movie);
             }
@@ -128,15 +136,10 @@ public class MovieService {
                 movieDto.setTrailerName(trailerFile);
             }
             movie = this.modelMapper.map(movieDto, Movie.class);
-            Movie createdMovie = movieRepository.save(movie);
-            createMovieGenre(movieDto, createdMovie);
+            Set<MovieGenres> movieGenres = createMovieGenre(movieDto, movie);
+            movie.setMovieGenres(movieGenres);
+            movieRepository.save(movie);
         }
-
-        //movie = this.modelMapper.map(movieDto, Movie.class);
-        //System.out.println(movie);
-        /*Movie createdMovie = *//*movieRepository.save(movie)*/;
-        //createMovieGenre(movieDto, createdMovie);
-        //return movie;
     }
 
     public void delete(Long id){
@@ -181,6 +184,15 @@ public class MovieService {
         return filteredMovies;
     }
 
+    private Set<Long> getFilteredMoviesIds(List<Movie> movies, Specification<Movie> specification){
+        List<Movie> movies1 = filterMovies(new HashSet<>(movies), specification);
+        Set<Long> ids = new HashSet<>();
+        for(Movie movie: movies1){
+            ids.add(movie.getId());
+        }
+        return ids;
+    }
+
     private boolean hourAndMinuteBiggerThanCurrentDate(String time){
         if(time == null){
             return false;
@@ -197,7 +209,7 @@ public class MovieService {
     }
 
     public Set<MovieDto> getAllMoviesFromATheatre(Long theatreId){
-        return this.showTimingRepository.getAllMoviesFromATheatre(theatreId).stream()
+        return this.showTimingRepository.getAllShowTimingsFromATheatre(theatreId).stream()
                 .map(ShowTiming::getMovie)
                 .map(movie -> this.modelMapper.map(movie, MovieDto.class))
                 .collect(Collectors.toSet());
@@ -210,7 +222,7 @@ public class MovieService {
     public List<MoviesTimesDto> getAllMoviesFromATheatreAtAGivenDay(MovieFilterDto movieFilterDto, Long theatreId, Date day){
         List<MoviesTimesDto> moviesTimesDtos = new ArrayList<>();
         Specification<Movie> specification = this.movieSpecification.getMovies(movieFilterDto);
-        Set<Movie> movies = this.showTimingRepository.getAllMoviesFromATheatre(theatreId).stream()
+        Set<Movie> movies = this.showTimingRepository.getAllShowTimingsFromATheatre(theatreId).stream()
                 .filter(showTiming -> showTiming.getDay().getDate() == day.getDate() && showTiming.getDay().getMonth() == day.getMonth())
                 .map(ShowTiming::getMovie)
                 .collect(Collectors.toSet());
@@ -250,6 +262,37 @@ public class MovieService {
         return filteredMovies.stream()
                 .map(movie -> this.modelMapper.map(movie, MovieDto.class))
                 .collect(Collectors.toList());
+    }
+
+    public MoviePResponseDto getAllMoviesFromATheatre(TheatrePDto dto){
+        List<Movie> movies = this.showTimingRepository.getMoviesFromATheatre(PageRequest.of(dto.getPage(), dto.getSize()),
+                dto.getTheatreId());
+        List<MovieDto> movieDtos = movies.stream()
+                .map(movie -> this.modelMapper.map(movie, MovieDto.class))
+                .toList();
+
+        int totalMovies = 0;
+        if(this.movieRepository.findAll().size() > 0){
+            totalMovies = this.showTimingRepository.getMoviesFromATheatre(PageRequest.of(0, this.movieRepository.findAll().size()), dto.getTheatreId()).size();
+        }
+
+        return new MoviePResponseDto(movieDtos, totalMovies);
+    }
+
+    public MoviePResponseDto getAllFilteredMoviesFromATheatre(MovieFilterDto movieFilterDto, TheatrePDto dto){
+        Specification<Movie> specification = this.movieSpecification.getMovies(movieFilterDto);
+        Set<Long> filteredMovies = getFilteredMoviesIds(this.movieRepository.findAll(), specification);
+        int totalMovies = 0;
+        List<MovieDto> movieDtos = new ArrayList<>();
+        if(this.movieRepository.findAll().size() > 0){
+            Set<Movie> movies = new HashSet<>(this.showTimingRepository.getFilteredMoviesFromATheatre(PageRequest.of(dto.getPage(), dto.getSize()),
+                    dto.getTheatreId(), filteredMovies));
+            movieDtos = movies.stream()
+                    .map(movie -> this.modelMapper.map(movie, MovieDto.class))
+                    .toList();
+            totalMovies = this.showTimingRepository.getFilteredMoviesFromATheatre(PageRequest.of(0, this.movieRepository.findAll().size()), dto.getTheatreId(), filteredMovies).size();
+        }
+        return new MoviePResponseDto(movieDtos, totalMovies);
     }
 
     private boolean moviesRunningSoon(Date date){

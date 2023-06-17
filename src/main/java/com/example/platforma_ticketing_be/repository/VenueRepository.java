@@ -17,4 +17,7 @@ public interface VenueRepository extends JpaRepository<Venue, Long>, JpaSpecific
 
     @Query("select v from Venue v where v.theatre.id = ?1 order by v.venueNumber")
     Set<Venue> getAllVenueNumbersOfGivenTheatre(Long theatreId);
+
+    @Query("select count(v.id) from Venue v where v.theatre.id = ?1")
+    int getVenuesNumberFromTheatre(Long theatreId);
 }
