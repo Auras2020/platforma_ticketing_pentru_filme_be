@@ -21,16 +21,12 @@ public class EmailServiceImpl implements EmailService{
     @Value("${platforma.ticketing.email}")
     private String mailFrom;
 
-    //@Value("${platforma.ticketing.email}")
-    //private String mailTo;
-
     @Override
     public void sendEmail(String subject, String body, String mailTo) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(mailFrom);
         message.setTo(mailTo);
         message.setSubject(subject);
-        //body += "<a href='http://localhost:4200/reset-password'>Click</a>";
         message.setText(body);
         mailSender.send(message);
     }

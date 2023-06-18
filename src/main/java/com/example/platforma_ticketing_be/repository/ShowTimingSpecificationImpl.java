@@ -29,7 +29,7 @@ public class ShowTimingSpecificationImpl {
             }
             if (dto.getMovieName() != null && !dto.getMovieName().isEmpty()) {
                 Join<ShowTiming, Movie> showTimingMovieJoin = root.join("movie", JoinType.INNER);
-                predicates.add(builder.like(builder.lower(showTimingMovieJoin.get("name")), dto.getMovieName().toLowerCase() + "%"));
+                predicates.add(builder.like(builder.lower(showTimingMovieJoin.get("name")), "%" + dto.getMovieName().toLowerCase() + "%"));
             }
             if(dto.getStartDate() != null){
                 predicates.add(builder.greaterThanOrEqualTo(root.get("startDate"), dto.getStartDate()));
@@ -48,7 +48,7 @@ public class ShowTimingSpecificationImpl {
                         builder.like(builder.lower(showTimingTheatreJoin.get("name")), dto.getSearchString().toLowerCase() + "%"));
                 Join<ShowTiming, Movie> showTimingMovieJoin = root.join("movie", JoinType.INNER);
                 searchPredicatesList.add(
-                        builder.like(builder.lower(showTimingMovieJoin.get("name")), dto.getSearchString().toLowerCase() + "%"));
+                        builder.like(builder.lower(showTimingMovieJoin.get("name")), "%" + dto.getSearchString().toLowerCase() + "%"));
             }
 
             Predicate searchPredicate = builder.or(searchPredicatesList.toArray(new Predicate[0]));

@@ -54,7 +54,7 @@ public class MovieSpecificationImpl {
             List<Predicate> searchPredicatesList = new ArrayList<>();
 
             if (dto.getName() != null && !dto.getName().isEmpty()) {
-                predicates.add(builder.like(builder.lower(root.get("name")), dto.getName().toLowerCase() + "%"));
+                predicates.add(builder.like(builder.lower(root.get("name")), "%" + dto.getName().toLowerCase() + "%"));
             }
             if (dto.getRecommendedAge() != null && !dto.getRecommendedAge().isEmpty()) {
                 predicates.add(builder.equal((root.get("recommendedAge")), dto.getRecommendedAge()));
@@ -90,10 +90,10 @@ public class MovieSpecificationImpl {
                 }
             }
             if (dto.getActors() != null && !dto.getActors().isEmpty()) {
-                predicates.add(builder.like(builder.lower(root.get("actors")), dto.getActors().toLowerCase() + "%"));
+                predicates.add(builder.like(builder.lower(root.get("actors")), "%" + dto.getActors().toLowerCase() + "%"));
             }
             if (dto.getDirector() != null && !dto.getDirector().isEmpty()) {
-                predicates.add(builder.like(builder.lower(root.get("director")), dto.getDirector().toLowerCase() + "%"));
+                predicates.add(builder.like(builder.lower(root.get("director")), "%" + dto.getDirector().toLowerCase() + "%"));
             }
             if (dto.getSynopsis() != null && !dto.getSynopsis().isEmpty()) {
                 predicates.add(builder.like(builder.lower(root.get("synopsis")), "%" + dto.getSynopsis().toLowerCase() + "%"));
@@ -101,18 +101,18 @@ public class MovieSpecificationImpl {
 
             if ((dto.getSearchString() != null) && !(dto.getSearchString().isEmpty())) {
                 searchPredicatesList.add(
-                        builder.like(builder.lower(root.get("name")), dto.getSearchString().toLowerCase() + "%"));
+                        builder.like(builder.lower(root.get("name")), "%" + dto.getSearchString().toLowerCase() + "%"));
 
                 Join<Movie, MovieGenres> movieMovieGenresJoin = root.join("movieGenres", JoinType.INNER);
                 Join<MovieGenres, Genre> movieGenresGenreJoin = movieMovieGenresJoin.join("genre", JoinType.INNER);
                 searchPredicatesList.add(
-                        builder.like(builder.lower(movieGenresGenreJoin.get("name")), dto.getSearchString().toLowerCase() + "%"));
+                        builder.like(builder.lower(movieGenresGenreJoin.get("name")), "%" + dto.getSearchString().toLowerCase() + "%"));
                 query.distinct(true);
 
                 searchPredicatesList.add(
-                        builder.like(builder.lower(root.get("actors")), dto.getSearchString().toLowerCase() + "%"));
+                        builder.like(builder.lower(root.get("actors")), "%" + dto.getSearchString().toLowerCase() + "%"));
                 searchPredicatesList.add(
-                        builder.like(builder.lower(root.get("director")), dto.getSearchString().toLowerCase() + "%"));
+                        builder.like(builder.lower(root.get("director")), "%" + dto.getSearchString().toLowerCase() + "%"));
                 searchPredicatesList.add(
                         builder.like(builder.lower(root.get("synopsis")), "%" + dto.getSearchString().toLowerCase() + "%"));
             }

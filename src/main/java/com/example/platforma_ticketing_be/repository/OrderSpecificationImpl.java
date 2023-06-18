@@ -32,7 +32,7 @@ public class OrderSpecificationImpl {
             }
 
             if (dto.getMovieName() != null && !dto.getMovieName().isEmpty()) {
-                predicates.add(builder.like(builder.lower(showTimingMovieJoin.get("name")), dto.getMovieName().toLowerCase() + "%"));
+                predicates.add(builder.like(builder.lower(showTimingMovieJoin.get("name")), "%" + dto.getMovieName().toLowerCase() + "%"));
             }
 
             if (dto.getDay() != null) {
@@ -58,7 +58,7 @@ public class OrderSpecificationImpl {
                 searchPredicatesList.add(
                         builder.like(builder.lower(showTimingTheatreJoin.get("name")), dto.getSearchString().toLowerCase() + "%"));
                 searchPredicatesList.add(
-                        builder.like(builder.lower(showTimingMovieJoin.get("name")), dto.getSearchString().toLowerCase() + "%"));
+                        builder.like(builder.lower(showTimingMovieJoin.get("name")), "%" + dto.getSearchString().toLowerCase() + "%"));
                 Join<Orders, Product> ordersProductJoin = root.join("product", JoinType.INNER);
                 searchPredicatesList.add(
                         builder.like(builder.lower(ordersProductJoin.get("name")), dto.getSearchString().toLowerCase() + "%"));

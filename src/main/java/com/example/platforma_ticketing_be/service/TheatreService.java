@@ -2,11 +2,10 @@ package com.example.platforma_ticketing_be.service;
 
 import com.example.platforma_ticketing_be.dtos.*;
 import com.example.platforma_ticketing_be.entities.Theatre;
+import com.example.platforma_ticketing_be.repository.ShowTimingRepository;
 import com.example.platforma_ticketing_be.repository.TheatreRepository;
 import com.example.platforma_ticketing_be.repository.TheatreSpecificationImpl;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,12 +15,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class TheatreService {
@@ -29,12 +26,14 @@ public class TheatreService {
     private final TheatreRepository theatreRepository;
     private final ModelMapper modelMapper;
     private final TheatreSpecificationImpl theatreSpecification;
+    private final ShowTimingRepository showTimingRepository;
 
 
-    public TheatreService(TheatreRepository theatreRepository, ModelMapper modelMapper, TheatreSpecificationImpl theatreSpecification) {
+    public TheatreService(TheatreRepository theatreRepository, ModelMapper modelMapper, TheatreSpecificationImpl theatreSpecification, ShowTimingRepository showTimingRepository) {
         this.theatreRepository = theatreRepository;
         this.modelMapper = modelMapper;
         this.theatreSpecification = theatreSpecification;
+        this.showTimingRepository = showTimingRepository;
     }
 
     private TheatrePageResponseDto getTheatrePageResponse(Page<Theatre> pageOfTheatres){

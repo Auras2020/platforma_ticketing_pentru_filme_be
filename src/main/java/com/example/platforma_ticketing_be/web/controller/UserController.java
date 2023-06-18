@@ -24,17 +24,24 @@ public class UserController {
         return this.userService.getAllUsers();
     }
 
-    @PostMapping("/page/filter")
-    public UserPageResponseDto getAllUsersBySpecsPage(
-            @RequestBody UserPageDto dto) {
-        return this.userService.findAllByPagingAndFilter(dto);
+    @PostMapping("/active/page/filter")
+    public UserPResponseDto getAllFilteredActiveAccounts(@RequestBody AdminUsersDto adminUsersDto) {
+        return this.userService.getAllFilteredActiveAccounts(adminUsersDto.getUserFilterDto(), adminUsersDto.getDto());
     }
 
-    @GetMapping("/page")
-    public UserPageResponseDto getAllUsersPage(
-            @RequestParam int page,
-            @RequestParam int size) {
-        return this.userService.findAllByPaging(page, size);
+    @PostMapping("/active/page")
+    public UserPResponseDto getAllActiveAccounts(@RequestBody UserPDto dto) {
+        return this.userService.getAllActiveAccounts(dto);
+    }
+
+    @PostMapping("/pending/page/filter")
+    public UserPResponseDto getAllFilteredPendingAccounts(@RequestBody AdminUsersDto adminUsersDto) {
+        return this.userService.getAllFilteredPendingAccounts(adminUsersDto.getUserFilterDto(), adminUsersDto.getDto());
+    }
+
+    @PostMapping("/pending/page")
+    public UserPResponseDto getAllPendingAccounts(@RequestBody UserPDto dto) {
+        return this.userService.getAllPendingAccounts(dto);
     }
 
     @PutMapping()
@@ -60,5 +67,15 @@ public class UserController {
     @GetMapping("/{email}")
     public UserAccount getUserByEmail(@PathVariable("email") String email){
         return this.userService.findByEmail(email);
+    }
+
+    @GetMapping("/approve-request/{email}")
+    public void approveRequest(@PathVariable("email") String email){
+        this.userService.approveRequest(email);
+    }
+
+    @GetMapping("/check-for-pending-registration")
+    public int checkIfThereArePendingRequests(){
+        return this.userService.checkIfThereArePendingRequests();
     }
 }

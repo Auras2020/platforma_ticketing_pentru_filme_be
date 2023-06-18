@@ -2,6 +2,7 @@ package com.example.platforma_ticketing_be.repository;
 
 import com.example.platforma_ticketing_be.entities.Movie;
 import com.example.platforma_ticketing_be.entities.ShowTiming;
+import com.example.platforma_ticketing_be.entities.Theatre;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -17,6 +18,9 @@ public interface ShowTimingRepository extends JpaRepository<ShowTiming, Long>, J
     @Query("select sh from show_schedule sh where sh.theatre.id = ?1")
     Set<ShowTiming> getAllShowTimingsFromATheatre(Long theatreId);
 
+    @Query("select sh from show_schedule sh where sh.theatre.id = ?1")
+    List<ShowTiming> findAllShowTimingsFromATheatre(Long theatreId);
+
     @Query("select sh.movie from show_schedule sh where sh.theatre.id = ?1 and sh.day = ?2")
     Set<Movie> getAllMoviesFromATheatreAtAGivenDay(Long theatreId, Date day);
 
@@ -29,8 +33,8 @@ public interface ShowTimingRepository extends JpaRepository<ShowTiming, Long>, J
     @Query("select sh from show_schedule sh where sh.theatre.id = ?1 and sh.movie.id = ?2 and sh.time = ?3")
     List<ShowTiming> findShowTimingByShowTimingDetails(Long theatreId, Long movieId, String time);
 
-    @Query("select count(sh.movie.id) from show_schedule sh where sh.theatre.id = ?1")
-    int countMoviesFromATheatre(Long theatreId);
+    @Query("select distinct sh.movie from show_schedule sh where sh.theatre.id = ?1")
+    List<Movie> countMoviesFromATheatre(Long theatreId);
 
     @Query("select distinct sh.movie from show_schedule sh where sh.theatre.id = :theatreId")
     List<Movie> getMoviesFromATheatre(Pageable pageable, Long theatreId);

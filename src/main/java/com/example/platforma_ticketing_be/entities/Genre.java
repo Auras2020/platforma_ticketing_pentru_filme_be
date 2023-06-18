@@ -21,9 +21,6 @@ public class Genre {
     @Column(name = "name", nullable = false)
     private String name;
 
-    /*@OneToMany(mappedBy = "genre", cascade = CascadeType.ALL)
-    private Set<MovieGenres> movieGenres;*/
-
     public Genre(Long id, String name) {
         this.id = id;
         this.name = name;

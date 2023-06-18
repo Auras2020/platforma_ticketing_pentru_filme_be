@@ -58,10 +58,10 @@ public class UserSpecificationImpl {
                 }
             }
             if (dto.getName() != null && !dto.getName().isEmpty()) {
-                predicates.add(builder.like(builder.lower(root.get("name")), dto.getName().toLowerCase() + "%"));
+                predicates.add(builder.like(builder.lower(root.get("name")), "%" + dto.getName().toLowerCase() + "%"));
             }
             if (dto.getEmail() != null && !dto.getEmail().isEmpty()) {
-                predicates.add(builder.like(builder.lower(root.get("email")), dto.getEmail().toLowerCase() + "%"));
+                predicates.add(builder.like(builder.lower(root.get("email")), "%" + dto.getEmail().toLowerCase() + "%"));
             }
             if (dto.getAgeInterval() != null && !dto.getAgeInterval().isEmpty()) {
                 if(getLeftAgeInterval(dto.getAgeInterval()).equals("<")){
@@ -76,9 +76,9 @@ public class UserSpecificationImpl {
 
             if ((dto.getSearchString() != null) && !(dto.getSearchString().isEmpty())) {
                 searchPredicatesList.add(
-                        builder.like(builder.lower(root.get("name")), dto.getSearchString().toLowerCase() + "%"));
+                        builder.like(builder.lower(root.get("name")), "%" + dto.getSearchString().toLowerCase() + "%"));
                 searchPredicatesList.add(
-                        builder.like(builder.lower(root.get("email")), dto.getSearchString().toLowerCase() + "%"));
+                        builder.like(builder.lower(root.get("email")), "%" + dto.getSearchString().toLowerCase() + "%"));
                 searchPredicatesList.add(
                         builder.like(builder.lower(root.get("role")), dto.getSearchString().toLowerCase() + "%"));
             }
