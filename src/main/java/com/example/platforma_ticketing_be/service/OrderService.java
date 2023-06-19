@@ -623,7 +623,7 @@ public class OrderService {
                 " at theatre " + ordersDto.getShowTiming().getTheatre().getName() + " on date of " +
                 changeDateFormat(ordersDto.getShowTiming().getDay()) + " " +
                 ordersDto.getShowTiming().getTime() + " were " + ordersDto.getTicketsStatus() +
-                (newStatus.equals("cancelled") && oldStatus.equals("bought") ? ". You will receive your money soon." : "");
+                (!newStatus.equals("bought") && oldStatus.equals("bought") ? ". You will receive your money soon." : "");
         this.emailService.sendEmail(subject, body, ordersDto.getUser().getEmail());
     }
 
@@ -633,7 +633,7 @@ public class OrderService {
                 " at theatre " + ordersDto.getShowTiming().getTheatre().getName() + " on date of " +
                 changeDateFormat(ordersDto.getShowTiming().getDay()) + " " +
                 ordersDto.getShowTiming().getTime() + " were " + ordersDto.getProductsStatus() +
-                (newStatus.equals("cancelled") && oldStatus.equals("bought") ? ". You will receive your money soon." : "");
+                (!newStatus.equals("bought") && oldStatus.equals("bought") ? ". You will receive your money soon." : "");
         this.emailService.sendEmail(subject, body, ordersDto.getUser().getEmail());
     }
 

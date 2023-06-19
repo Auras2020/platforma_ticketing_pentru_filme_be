@@ -46,55 +46,55 @@ public interface OrderRepository extends JpaRepository<Orders, Long>, JpaSpecifi
 
     @Query("SELECT o.showTiming.movie.name, COUNT(o.showTiming.movie.id) AS number_of_tickets " +
             "FROM Orders o " +
-            "WHERE o.seat IS NOT NULL AND o.ticketStatus <> 'cancelled' " +
+            "WHERE o.seat IS NOT NULL AND o.ticketStatus = 'bought' " +
             "GROUP BY o.showTiming.movie.name " +
             "ORDER BY number_of_tickets desc")
     List<Object[]> findNumberOfTicketsPerMovie();
 
     @Query("SELECT o.showTiming.movie.name, COUNT(o.showTiming.movie.id) AS number_of_tickets " +
             "FROM Orders o " +
-            "WHERE o.showTiming.theatre.id = ?1 AND o.seat IS NOT NULL AND o.ticketStatus <> 'cancelled' " +
+            "WHERE o.showTiming.theatre.id = ?1 AND o.seat IS NOT NULL AND o.ticketStatus = 'bought' " +
             "GROUP BY o.showTiming.movie.name " +
             "ORDER BY number_of_tickets desc")
     List<Object[]> findNumberOfTicketsPerMovieFromGivenTheatre(Long theatreId);
 
     @Query("SELECT o.showTiming.movie.name, SUM(o.ticketsPrice) AS price_of_tickets " +
             "FROM Orders o " +
-            "WHERE o.ticketStatus <> 'cancelled' " +
+            "WHERE o.ticketStatus = 'bought' " +
             "GROUP BY o.showTiming.movie.name " +
             "ORDER BY price_of_tickets desc")
     List<Object[]> findPriceOfTicketsPerMovie();
 
     @Query("SELECT o.showTiming.movie.name, SUM(o.ticketsPrice) AS price_of_tickets " +
             "FROM Orders o " +
-            "WHERE o.showTiming.theatre.id = ?1 AND o.ticketStatus <> 'cancelled' " +
+            "WHERE o.showTiming.theatre.id = ?1 AND o.ticketStatus = 'bought' " +
             "GROUP BY o.showTiming.movie.name " +
             "ORDER BY price_of_tickets desc")
     List<Object[]> findPriceOfTicketsPerMovieFromGivenTheatre(Long theatreId);
 
     @Query("SELECT o.product.name, SUM(o.numberProducts) AS number_of_products " +
             "FROM Orders o " +
-            "WHERE o.product.id IS NOT NULL AND o.productsStatus <> 'cancelled' " +
+            "WHERE o.product.id IS NOT NULL AND o.productsStatus = 'bought' " +
             "GROUP BY o.product.name " +
             "ORDER BY number_of_products desc")
     List<Object[]> findNumberOfProductsSold();
 
     @Query("SELECT o.product.name, SUM(o.numberProducts) AS number_of_products " +
             "FROM Orders o " +
-            "WHERE o.showTiming.theatre.id = ?1 AND o.product.id IS NOT NULL AND o.productsStatus <> 'cancelled' " +
+            "WHERE o.showTiming.theatre.id = ?1 AND o.product.id IS NOT NULL AND o.productsStatus = 'bought' " +
             "GROUP BY o.product.name " +
             "ORDER BY number_of_products desc")
     List<Object[]> findNumberOfProductsSoldFromGivenTheatre(Long theatreId);
 
-    @Query("SELECT COUNT(o.id) FROM Orders o WHERE o.ticketStatus <> 'cancelled' AND o.seat IS NOT NULL")
+    @Query("SELECT COUNT(o.id) FROM Orders o WHERE o.ticketStatus = 'bought' AND o.seat IS NOT NULL")
     Integer getNumberOfTicketsSold();
 
-    @Query("SELECT COUNT(o.id) FROM Orders o WHERE o.showTiming.theatre.id = ?1 AND o.ticketStatus <> 'cancelled' AND o.seat IS NOT NULL")
+    @Query("SELECT COUNT(o.id) FROM Orders o WHERE o.showTiming.theatre.id = ?1 AND o.ticketStatus = 'bought' AND o.seat IS NOT NULL")
     Integer getNumberOfTicketsSoldFromATheatre(Long theatreId);
 
-    @Query("SELECT SUM(o.numberProducts) FROM Orders o WHERE o.productsStatus <> 'cancelled' AND o.product.id IS NOT NULL")
+    @Query("SELECT SUM(o.numberProducts) FROM Orders o WHERE o.productsStatus = 'bought' AND o.product.id IS NOT NULL")
     Integer getNumberOfProductsSold();
 
-    @Query("SELECT SUM(o.numberProducts) FROM Orders o WHERE o.showTiming.theatre.id = ?1 AND o.productsStatus <> 'cancelled' AND o.product.id IS NOT NULL")
+    @Query("SELECT SUM(o.numberProducts) FROM Orders o WHERE o.showTiming.theatre.id = ?1 AND o.productsStatus = 'bought' AND o.product.id IS NOT NULL")
     Integer getNumberOfProductsSoldFromATheatre(Long theatreId);
 }
