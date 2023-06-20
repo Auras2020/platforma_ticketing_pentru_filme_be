@@ -604,8 +604,8 @@ public class OrderService {
         List<ProductDetailsDto> productDetailsDtos = new ArrayList<>();
         for(Orders order: orders){
             if(order.getProduct() != null){
-                productDetailsDtos.add(new ProductDetailsDto(order.getProduct().getName(), order.getProduct().getPrice(),
-                        order.getProduct().getQuantity(), order.getNumberProducts()));
+                productDetailsDtos.add(new ProductDetailsDto(order.getProduct().getId(), order.getProduct().getName(),
+                        order.getProduct().getPrice(), order.getProduct().getQuantity(), order.getNumberProducts()));
             }
         }
         return productDetailsDtos;

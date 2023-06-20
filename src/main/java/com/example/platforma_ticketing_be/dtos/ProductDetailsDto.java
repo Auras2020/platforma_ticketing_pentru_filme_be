@@ -14,10 +14,4 @@ public class ProductDetailsDto {
     private int quantity;
     private int number;
 
-    public ProductDetailsDto(String name, int price, int quantity, int number) {
-        this.name = name;
-        this.price = price;
-        this.quantity = quantity;
-        this.number = number;
-    }
 }
