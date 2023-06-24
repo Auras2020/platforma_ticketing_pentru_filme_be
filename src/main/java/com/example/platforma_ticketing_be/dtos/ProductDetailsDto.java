@@ -13,5 +13,5 @@ public class ProductDetailsDto {
     private int price;
     private int quantity;
     private int number;
-
+    private String category;
 }

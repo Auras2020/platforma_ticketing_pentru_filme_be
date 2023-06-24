@@ -605,7 +605,8 @@ public class OrderService {
         for(Orders order: orders){
             if(order.getProduct() != null){
                 productDetailsDtos.add(new ProductDetailsDto(order.getProduct().getId(), order.getProduct().getName(),
-                        order.getProduct().getPrice(), order.getProduct().getQuantity(), order.getNumberProducts()));
+                        order.getProduct().getPrice(), order.getProduct().getQuantity(), order.getNumberProducts(),
+                        order.getProduct().getCategory()));
             }
         }
         return productDetailsDtos;
