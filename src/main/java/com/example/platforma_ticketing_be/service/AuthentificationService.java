@@ -30,15 +30,12 @@ public class AuthentificationService {
 
     private final UserRepository userRepository;
 
-    private final UserService userService;
-
     private final EmailServiceImpl emailService;
 
 
-    public AuthentificationService(JwtTokenValidator jwtTokenValidator, UserRepository userRepository, UserService userService, EmailServiceImpl emailService) {
+    public AuthentificationService(JwtTokenValidator jwtTokenValidator, UserRepository userRepository, EmailServiceImpl emailService) {
         this.jwtTokenValidator = jwtTokenValidator;
         this.userRepository = userRepository;
-        this.userService = userService;
         this.emailService = emailService;
     }
 

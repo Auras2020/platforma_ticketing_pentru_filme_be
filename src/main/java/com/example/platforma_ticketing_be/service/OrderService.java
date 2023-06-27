@@ -6,7 +6,6 @@ import com.example.platforma_ticketing_be.repository.*;
 import com.example.platforma_ticketing_be.service.email.EmailServiceImpl;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
@@ -26,7 +25,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import javax.activation.DataSource;
-import javax.imageio.ImageIO;
 import javax.mail.util.ByteArrayDataSource;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -34,8 +32,6 @@ import javax.persistence.criteria.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
@@ -95,7 +91,7 @@ public class OrderService {
         contentByte.stroke();
     }
 
-    private void displayImage(PdfWriter writer, Document document, String text) {
+    private void displayImage(PdfWriter writer, Document document) {
         try {
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
 
@@ -105,9 +101,7 @@ public class OrderService {
 
             UUID uniqueId = UUID.randomUUID();
             String uniqueIdString = uniqueId.toString();
-            String encodedJson = "https://www.hotmoviescenter.com/" + uniqueIdString /*+ "/" +
-                    URLEncoder.encode(text, StandardCharsets.UTF_8)*/;
-            BitMatrix bitMatrix = qrCodeWriter.encode(encodedJson, BarcodeFormat.QR_CODE, 200, 200, hints);
+            BitMatrix bitMatrix = qrCodeWriter.encode(uniqueIdString, BarcodeFormat.QR_CODE, 200, 200, hints);
             BufferedImage qrImage = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
 
             for (int x = 0; x < 200; x++) {
@@ -236,7 +230,7 @@ public class OrderService {
             displayParagraph("Column: " + j1, document, font, 0);
             s += "Column: " + j1;
 
-            displayImage(writer, document, s);
+            displayImage(writer, document);
 
             displayParagraph("\n", document, fontTitle, 0);
             displayOrangeLine(writer, document);
@@ -326,7 +320,7 @@ public class OrderService {
             displayParagraph("Number: " + productDetails.get(i).getNumber(), document, font, 0);
             s += "Number: " + productDetails.get(i).getNumber();
 
-            displayImage(writer, document, s);
+            displayImage(writer, document);
 
             displayParagraph("\n", document, fontTitle, 0);
             displayOrangeLine(writer, document);
