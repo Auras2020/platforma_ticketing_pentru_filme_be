@@ -19,7 +19,7 @@ public interface OrderRepository extends JpaRepository<Orders, Long>, JpaSpecifi
             "INNER JOIN Orders o ON o.showTiming.id = st.id " +
             "WHERE o.user.id = :id " +
             "GROUP BY st, o.createdDate, o.ticketStatus, o.productsStatus " +
-            "ORDER BY st.day desc, st.time, o.createdDate desc")
+            "ORDER BY st.day desc, st.time desc, o.createdDate desc")
     List<Object[]> findOrdersOfAUser(Pageable pageable, Long id);
 
     @Query("SELECT st, o.ticketStatus, SUM(o.numberProducts), o.productsStatus, o.createdDate " +
@@ -27,7 +27,7 @@ public interface OrderRepository extends JpaRepository<Orders, Long>, JpaSpecifi
             "INNER JOIN Orders o ON o.showTiming.id = st.id " +
             "WHERE o.user.id = :id and o.id in :ids " +
             "GROUP BY st, o.createdDate, o.ticketStatus, o.productsStatus " +
-            "ORDER BY st.day desc, st.time, o.createdDate desc")
+            "ORDER BY st.day desc, st.time desc, o.createdDate desc")
     List<Object[]> findFilteredOrdersOfAUser(Pageable pageable, Long id, Set<Long> ids);
 
     @Query("SELECT o FROM Orders o WHERE o.showTiming.id = ?1 AND o.ticketsPrice > 0 AND o.createdDate = ?2")
